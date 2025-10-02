@@ -9,9 +9,151 @@ generator client {
 }
 
 datasource db {
-  provider = "postgresql"
-  url      = env("DATABASE_URL")
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
   directUrl = env("DIRECT_URL")
 }
 
+enum Role {
+  CASHIER
+  ADMIN
+}
 
+model User {
+  id             Int     @id @default(autoincrement())
+  fullName       String
+  email          String  @unique
+  password       String
+  role           Role    @default(CASHIER)
+  isDeleted      Boolean @default(false) // Soft delete
+  profilePicture String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  shifts       Shift[]
+  transactions Transaction[]
+
+  @@index([role, isDeleted]) // filter by role and active status
+  @@index([isDeleted]) // filter by active users
+  @@index([fullName, isDeleted]) // search by name
+  @@index([email, isDeleted]) // filter by email and active status
+}
+
+enum ShiftStatus {
+  OPEN
+  CLOSED
+}
+
+model Shift {
+  id                Int       @id @default(autoincrement())
+  openedAt          DateTime  @default(now())
+  closedAt          DateTime?
+  openingBalance    Decimal   @db.Decimal(12, 2)
+  closingBalance    Decimal?  @db.Decimal(12, 2)
+  totalCash         Decimal?  @db.Decimal(12, 2)
+  totalDebit        Decimal?  @db.Decimal(12, 2)
+  totalTransactions Int?
+  cashDifference    Decimal?  @db.Decimal(12, 2)
+
+  // Relations
+  status       ShiftStatus   @default(OPEN)
+  cashierId    Int
+  cashier      User          @relation(fields: [cashierId], references: [id])
+  transactions Transaction[]
+
+  @@index([cashierId]) // filter by cashier
+  @@index([status]) // filter by status
+  @@index([openedAt, closedAt]) // filter by date range
+}
+
+model Product {
+  id           Int     @id @default(autoincrement())
+  name         String
+  price        Float
+  stock        Int
+  isDeleted    Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  categoryId       Int
+  category         Category          @relation(fields: [categoryId], references: [id])
+  transactionItems TransactionItem[]
+  images          ProductImage[]
+
+  @@index([price]) // filter by price range
+  @@index([name]) // search by name
+  @@index([categoryId, isDeleted]) // filter by category and active status
+}
+
+model ProductImage {
+  id       Int     @id @default(autoincrement())
+  url       String
+  publicId String? @unique @db.VarChar(255)
+  isPrimary Boolean @default(false)
+
+  // Relations
+  productId Int
+  product Product @relation(fields: [productId], references: [id])
+
+  @@index([productId]) // filter by product
+}
+
+model Category {
+  id        Int     @id @default(autoincrement())
+  name      String  @unique
+  isDeleted Boolean @default(false)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  // Relations
+  products Product[]
+
+  @@index([name]) // search by name
+  @@index([isDeleted]) // filter by active categories
+}
+
+enum PaymentMethod {
+  CASH
+  DEBIT_CARD
+}
+
+model Transaction {
+  id              Int           @id @default(autoincrement())
+  cashierId       Int
+  shiftId         Int
+  totalAmount     Decimal       @db.Decimal(12, 2)
+  transactionTime DateTime      @default(now())
+  paymentMethod   PaymentMethod
+
+  createdAt DateTime @default(now())
+
+  // Relations
+  cashier          User              @relation(fields: [cashierId], references: [id])
+  shift            Shift             @relation(fields: [shiftId], references: [id])
+  transactionItems TransactionItem[]
+
+  @@index([cashierId]) // filter by cashier
+  @@index([shiftId]) // filter by shift
+  @@index([transactionTime]) // filter by date range
+  @@index([paymentMethod]) // filter by payment method
+}
+
+model TransactionItem {
+  id            Int     @id @default(autoincrement())
+  transactionId Int
+  productId     Int
+  quantity      Int
+  subtotal      Decimal @db.Decimal(12, 2)
+
+  // Relations
+  transaction Transaction @relation(fields: [transactionId], references: [id])
+  product     Product     @relation(fields: [productId], references: [id])
+
+  @@index([transactionId]) // filter by transaction
+  @@index([productId]) // filter by product
+}
