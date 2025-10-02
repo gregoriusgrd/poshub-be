@@ -1,19 +1,8 @@
 {
   "name": "backend",
   "version": "1.0.0",
-  "description": "",
-  "homepage": "https://github.com/gregoriusgrd/poshub-be#readme",
-  "bugs": {
-    "url": "https://github.com/gregoriusgrd/poshub-be/issues"
-  },
-  "repository": {
-    "type": "git",
-    "url": "git+https://github.com/gregoriusgrd/poshub-be.git"
-  },
-  "license": "ISC",
-  "author": "",
   "type": "commonjs",
-  "main": "index.js",
+  "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
     "postinstall": "prisma generate",
@@ -32,6 +21,7 @@
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
     "express": "^5.1.0",
+    "helmet": "^8.1.0",
     "jsonwebtoken": "^9.0.2",
     "multer": "^2.0.2",
     "winston": "^3.18.3",
@@ -42,6 +32,7 @@
     "@types/cookie-parser": "^1.4.9",
     "@types/cors": "^2.8.19",
     "@types/express": "^5.0.3",
+    "@types/helmet": "^0.0.48",
     "@types/jsonwebtoken": "^9.0.10",
     "@types/multer": "^2.0.0",
     "@types/node": "^24.6.1",
