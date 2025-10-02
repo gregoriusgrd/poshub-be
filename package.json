@@ -1,15 +1,28 @@
 {
-  "devDependencies": {
-    "@types/bcrypt": "^6.0.0",
-    "@types/cookie-parser": "^1.4.9",
-    "@types/cors": "^2.8.19",
-    "@types/express": "^5.0.3",
-    "@types/jsonwebtoken": "^9.0.10",
-    "@types/multer": "^2.0.0",
-    "@types/node": "^24.6.1",
-    "prisma": "^6.16.3",
-    "ts-node": "^10.9.2",
-    "typescript": "^5.9.3"
+  "name": "backend",
+  "version": "1.0.0",
+  "description": "",
+  "homepage": "https://github.com/gregoriusgrd/poshub-be#readme",
+  "bugs": {
+    "url": "https://github.com/gregoriusgrd/poshub-be/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/gregoriusgrd/poshub-be.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "postinstall": "prisma generate",
+    "dev": "nodemon src/index.ts",
+    "start": "npm run build && node dist/index.js",
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "prisma": {
+    "schema": "./prisma/models/schema.prisma"
   },
   "dependencies": {
     "@prisma/client": "^6.16.3",
@@ -23,5 +36,19 @@
     "multer": "^2.0.2",
     "winston": "^3.18.3",
     "zod": "^4.1.11"
+  },
+  "devDependencies": {
+    "@types/bcrypt": "^6.0.0",
+    "@types/cookie-parser": "^1.4.9",
+    "@types/cors": "^2.8.19",
+    "@types/express": "^5.0.3",
+    "@types/jsonwebtoken": "^9.0.10",
+    "@types/multer": "^2.0.0",
+    "@types/node": "^24.6.1",
+    "nodemon": "^3.1.10",
+    "prisma": "^6.16.3",
+    "ts-node": "^10.9.2",
+    "tsx": "^4.20.6",
+    "typescript": "^5.9.3"
   }
 }
