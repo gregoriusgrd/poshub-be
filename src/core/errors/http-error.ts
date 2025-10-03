@@ -4,8 +4,13 @@ export type HttpErrorShape = Error & {
   details?: unknown; // optional: untuk tambahan info
 };
 
+export function isHttpError(err: any): err is HttpErrorShape {
+  return err?.name === "HttpError" && typeof err?.statusCode === "number";
+}
+
 /**
- * Factory function untuk membuat HttpError object.
+ * Factory function untuk membuat HttpError object
+ * untuk service controller dsb
  */
 export function HttpError(
   statusCode: number,

@@ -3,6 +3,7 @@ import cookieParser from 'cookie-parser';
 import { helmetConfig } from './config/helmet';
 import { corsConfig } from './config/cors';
 import router from './routes';
+import { errorHandler, notFoundHandler } from './core/middlewares/error.middleware';
 
 /* Server Setup */
 
@@ -21,5 +22,11 @@ app.use("/api", router);
 app.get("/", (req, res) => {
     res.send("Server is running 🚀")
 })
+
+// Not Found (route tidak ada)
+app.use(notFoundHandler);
+
+// Global Error Handler
+app.use(errorHandler);
 
 export default app;
