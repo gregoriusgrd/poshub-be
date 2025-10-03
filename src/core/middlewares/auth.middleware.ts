@@ -1,5 +1,5 @@
 import  { Request, Response, NextFunction } from "express";
-import { verifyJwtToken } from "../utils/jwt";
+import { verifyJwtToken } from "../utils/jwt.util";
 import { unauthorized } from "../errors/http-error";
 
 // Middleware untuk melindungi route yang membutuhkan autentikasi
