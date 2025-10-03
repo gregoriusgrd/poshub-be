@@ -1,18 +1,12 @@
 import jwt from "jsonwebtoken";
 import { config } from "dotenv";
-import { Role } from "@prisma/client";
 import { env } from "../../config/env";
+import { TokenPayload } from "../types/jwt.types";
 
 config();
 
 const JWT_SECRET = env.JWT_SECRET
 const JWT_EXPIRES_IN = "1d" // 1 day
-
-// Isi token JWT yang disimpan di cookie / Authorization header
-interface TokenPayload {
-    userId: number;
-    role: Role;
-}
 
 // Buat JWT token baru
 export const signJwtToken = (payload: TokenPayload): string => {
