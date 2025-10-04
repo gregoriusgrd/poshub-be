@@ -35,13 +35,15 @@ export const findCashierById = async (id: number): Promise<User | null> => {
 
 // Find Active Cashiers
 
-export const findActiveCashiers = async (): Promise<User[]> => {
+export const findActiveCashiers = async (options?: { skip?: number; take?: number }): Promise<User[]> => {
     return await prisma.user.findMany({
         where: {
             role: Role.CASHIER,
             isDeleted: false,
         },
         orderBy: { createdAt: 'desc' },
+        skip: options?.skip,
+        take: options?.take,
     });
 };
 

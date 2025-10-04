@@ -15,6 +15,8 @@ router.use(requireAuth, requireRole([Role.ADMIN]))
 router.post("/", validateRequest(createCashierSchema), createCashierController);
 
 // GET all cashier
+
+// pagination > /cashiers?page=2&limit=10
 router.get("/", getAllCashiersController);
 
 // GET one cashier by ID

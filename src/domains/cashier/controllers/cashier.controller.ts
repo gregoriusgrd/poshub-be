@@ -29,7 +29,7 @@ export const createCashierController = async ( req: Request, res: Response, next
 
 export const getAllCashiersController = async ( req: Request, res: Response, next: NextFunction) => {
   try {
-    const cashiers = await getAllCashiersService();
+    const cashiers = await getAllCashiersService(req.query);
     return res.json({
       success: true,
       message: "Cashiers retrieved successfully",
