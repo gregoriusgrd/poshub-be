@@ -24,5 +24,6 @@ export const registerSchema = z.object({
     email: emailSchema,
     password: passwordSchema,
     role: z.enum(["ADMIN", "CASHIER"]),
+    fullName: z.string().min(1).max(100)
 })
 .strict();
