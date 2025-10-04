@@ -1,14 +1,16 @@
 import { Role, User } from "@prisma/client";
 import prisma from "../../../config/prisma";
+import { CreateCashierDTO } from "../dto/create-cashier.dto";
+import { UpdateCashierDTO } from "../dto/update-cashier.dto";
 
 // Create a new cashier
 
-export const createCashier = async (email: string, password: string, fullName: string): Promise<User> => {
+export const createCashier = async (data: CreateCashierDTO): Promise<User> => {
     return await prisma.user.create({
         data: {
-            email,
-            password,
-            fullName,
+            email: data.email,
+            password: data.password,
+            fullName: data.fullName,
             role: Role.CASHIER,
         },
     });
@@ -45,7 +47,7 @@ export const findActiveCashiers = async (): Promise<User[]> => {
 
 // Update a cashier by ID
 
-export const updateCashier = async (id: number, data: Partial<Pick<User, 'email' | 'fullName' | 'password'>>): Promise<User> => {
+export const updateCashier = async (id: number, data: UpdateCashierDTO): Promise<User> => {
     return await prisma.user.update({
         where: { id },
         data,
@@ -54,7 +56,7 @@ export const updateCashier = async (id: number, data: Partial<Pick<User, 'email'
 
 // Soft delete a cashier by ID
 
-export const deleteCashier = async (id: number): Promise<User> => {
+export const softDeleteCashier = async (id: number): Promise<User> => {
     return await prisma.user.update({
         where: { id },
         data: { isDeleted: true }, // soft delete di schema
