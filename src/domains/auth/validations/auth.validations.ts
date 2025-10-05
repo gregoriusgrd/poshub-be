@@ -1,4 +1,5 @@
 import { z } from 'zod';
+import { Role } from '@prisma/client';
 
 // Reusable schemas
 
@@ -27,3 +28,16 @@ export const registerSchema = z.object({
     fullName: z.string().min(1).max(100)
 })
 .strict();
+
+// ini sementara saja, nanti dihapus
+
+export interface TokenPayload {
+  userId: number;
+  role: Role;
+}
+
+declare module "express-serve-static-core" {
+  interface Request {
+    user?: TokenPayload;
+  }
+}

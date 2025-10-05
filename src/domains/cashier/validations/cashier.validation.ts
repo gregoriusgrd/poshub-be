@@ -3,7 +3,6 @@ import { z } from 'zod';
 // Reusable schemas
 
 const fullNameSchema = z.string()
-  .trim()
   .min(3, { message: "Full name must be at least 3 characters long" })
   .max(50, { message: "Full name must be at most 50 characters long" });
 
