@@ -1,11 +1,20 @@
 import { Request, Response, NextFunction } from "express";
 import { createProductSchema, productIdSchema, updateProductSchema } from "../validations/product.validations";
 import { createProductService, deleteProductService, getAllProductsService, getProductByIdService, updateProductService } from "../services/product.service";
+import { badRequest } from "../../../core/errors/http-error";
+import { EC } from "../../../core/errors/error-codes";
 
 export const createProductController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = createProductSchema.parse(req.body);
-    const newProduct = await createProductService(data);
+    const files = req.files as Express.Multer.File[] | undefined;
+
+    if (files && files.length > 5) {
+        throw badRequest("Maximum 5 images allowed", EC.BAD_REQUEST);
+    }
+
+    const newProduct = await createProductService(data, files);
+
     return res.status(201).json({
       success: true,
       message: "Product created successfully",

@@ -1,30 +1,60 @@
 import prisma from "../../../config/prisma";
 import { getPagination } from "../../../core/utils/pagination.util";
-import { badRequest, conflict, notFound } from "../../../core/errors/http-error";
+import { badRequest, notFound, internalError } from "../../../core/errors/http-error";
 import { EC } from "../../../core/errors/error-codes";
 import { CreateProductDTO } from "../dto/create-product.dto";
 import { UpdateProductDTO } from "../dto/update-product.dto";
 import { Prisma } from "@prisma/client";
+import { cloudinaryUpload } from "../../../core/utils/cloudinary.util";
 
 // CREATE PRODUCT
-export const createProductService = async (data: CreateProductDTO) => {
-  const existing = await prisma.product.findFirst({
-    where: {
-      name: data.name,
-      isDeleted: false,
-    },
-  });
+export const createProductService = async (
+  data: CreateProductDTO,
+  files?: Express.Multer.File[]
+) => {
+  const { name, price, stock, categoryId } = data;
 
-  if (existing) throw conflict("Product name already exists", EC.CONFLICT);
+  // Validasi minimal manual
+  if (!name || !price || !categoryId) {
+    throw badRequest("Missing required fields", EC.BAD_REQUEST);
+  }
 
-  const { images, ...productData } = data;
+  // Upload semua file ke Cloudinary (jika ada)
+  let uploadedImages: string[] = [];
+  if (files && files.length > 0) {
+    try {
+      const uploadPromises = files.map((file) =>
+        cloudinaryUpload(file, undefined, "products")
+      );
+      const results = await Promise.all(uploadPromises);
+      uploadedImages = results.map((res) => res.secure_url);
+    } catch (error) {
+      throw internalError("Failed to upload product images", EC.INTERNAL_SERVER_ERROR, error);
+    }
+  }
 
-  const newProduct = await prisma.product.create({
-    data: {
-      ...productData,
-      images: images ? { create: images.map((url) => ({ url })) } : undefined,
-    },
-    include: { category: true, images: true },
+  // Transaksi Prisma: create product + image
+  const newProduct = await prisma.$transaction(async (tx) => {
+    const product = await tx.product.create({
+      data: {
+        name,
+        price,
+        stock,
+        categoryId,
+        images:
+          uploadedImages.length > 0
+            ? {
+                create: uploadedImages.map((url) => ({ url })),
+              }
+            : undefined,
+      },
+      include: {
+        category: true,
+        images: true,
+      },
+    });
+
+    return product;
   });
 
   return newProduct;

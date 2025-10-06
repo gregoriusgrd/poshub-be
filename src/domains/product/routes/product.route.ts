@@ -3,6 +3,7 @@ import { createProductController, deleteProductController, getAllProductsControl
 import { requireRole } from "../../../core/middlewares/role.middleware";
 import { requireAuth } from "../../../core/middlewares/auth.middleware";
 import { Role } from "@prisma/client";
+import { uploaderRules } from "../../../core/utils/uploader.util";
 
 const router = Router();
 
@@ -21,7 +22,7 @@ router.get("/:id", getProductByIdController);
 
 router.use(requireAuth, requireRole([Role.ADMIN]));
 
-router.post("/", createProductController);
+router.post("/", uploaderRules.productImages.array("images", 5), createProductController);
 router.put("/:id", updateProductController);
 router.delete("/:id", deleteProductController);
 
