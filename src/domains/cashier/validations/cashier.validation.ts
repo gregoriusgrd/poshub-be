@@ -19,40 +19,29 @@ const passwordSchema = z.string()
 // CREATE Cashier
 
 export const createCashierSchema = z.object({
-    body: z.object({
-        fullName: fullNameSchema,
-        email: emailSchema,
-        password: passwordSchema,
-        profilePicture: z.string().url().optional(),
-    })
-})
+  fullName: fullNameSchema,
+  email: emailSchema,
+  password: passwordSchema,
+  profilePicture: z.string().url().optional(),
+});
 
 // UPDATE Cashier
 
 export const updateCashierSchema = z.object({
-    body: z.object({
-        fullName: fullNameSchema.optional(),
-        email: emailSchema.optional(),
-        password: passwordSchema.optional(),
-        profilePicture: z.string().url().optional(),
-    }),
-    params: z.object({
-        id: z.string().regex(/^\d+$/, "Id must be a number"),
-    }),
+  fullName: fullNameSchema.optional(),
+  email: emailSchema.optional(),
+  password: passwordSchema.optional(),
+  profilePicture: z.string().url().optional(),
 });
 
 // GET ONE Cashier (by id)
 
 export const getOneCashierSchema = z.object({
-    params: z.object({
-        id: z.string().regex(/^\d+$/, "Id must be a number"),
-    }),
+  id: z.string().regex(/^\d+$/, "Id must be a number"),
 });
 
 // DELETE Cashier (by id)
 
 export const deleteCashierSchema = z.object({
-    params: z.object({
-        id: z.string().regex(/^\d+$/, "Id must be a number"),
-    })
-})
+  id: z.string().regex(/^\d+$/, "Id must be a number"),
+});

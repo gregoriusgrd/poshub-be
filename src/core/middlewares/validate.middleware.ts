@@ -7,11 +7,7 @@ import { badRequest } from "../errors/http-error";
 export const validateRequest = (schema: ZodTypeAny) => {
   return (req: Request, res: Response, next: NextFunction) => {
     try {
-      schema.parse({
-        body: req.body,
-        params: req.params,
-        query: req.query,
-      }); // Validasi body request
+      schema.parse(req.body); // Validasi body request
       next();
     } catch (err) {
       if (err instanceof ZodError) {

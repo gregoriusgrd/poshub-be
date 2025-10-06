@@ -9,7 +9,7 @@ import { logger } from "../../config/logger";
 export const requireAuth = (req: Request, res: Response, next: NextFunction) => {
     const authHeader = req.headers.authorization ?? "";
     const bearerToken = authHeader.startsWith("Bearer ") ? authHeader.slice(7).trim() : undefined;
-    const token = req.cookies?.token || bearerToken;
+    const token = req.cookies?.auth_token || bearerToken;
 
     if (!token) return next(unauthorized("Authentication token is missing"));
 
