@@ -1,8 +1,12 @@
+/*
+
 import { Request, Response, NextFunction } from "express";
 import { createProductSchema, productIdSchema, updateProductSchema } from "../validations/product.validations";
 import { createProductService, deleteProductService, getAllProductsService, getProductByIdService, updateProductService } from "../services/product.service";
 import { badRequest } from "../../../core/errors/http-error";
 import { EC } from "../../../core/errors/error-codes";
+
+
 
 export const createProductController = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -27,16 +31,16 @@ export const createProductController = async (req: Request, res: Response, next:
 
 export const getAllProductsController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const { page, limit, search, categoryId, sortBy, sortOrder } = req.query;
+        const pagination = {
+            page: Number(req.query.page) || 1,
+            limit: Number(req.query.limit) || 10,
+            search: req.query.search?.toString(),
+            categoryId: req.query.categoryId ? Number(req.query.categoryId) : undefined,
+            sortBy: req.query.sortBy as "name" | "price" | "createdAt" | undefined,
+            order: req.query.sortOrder as "asc" | "desc" | undefined,
+        };
 
-        const products = await getAllProductsService({
-            page: page ?  Number(page) : 1,
-            limit: limit ? Number(limit) : 10,
-            search: search ? String(search) : undefined,
-            categoryId: categoryId ? Number(categoryId) : undefined,
-            sortBy: sortBy ? (sortBy as "name" | "price" | "createdAt") : undefined,
-            order: sortOrder ? (sortOrder as "asc" | "desc") : undefined,
-        });
+        const products = await getAllProductsService(pagination);
 
         return res.status(200).json({
             success: true,
@@ -67,8 +71,13 @@ export const updateProductController = async (req: Request, res: Response, next:
     try {
         const { id } = productIdSchema.parse(req.params);
         const data = updateProductSchema.parse(req.body);
+        const files = req.files as Express.Multer.File[] | undefined;
 
-        const updatedProduct = await updateProductService(id, data);
+        if (files && files.length > 5) {
+            throw badRequest("Maximum 5 images allowed", EC.BAD_REQUEST);
+        }
+
+        const updatedProduct = await updateProductService(id, data, files);
 
         return res.json({
             success: true,
@@ -93,3 +102,5 @@ export const deleteProductController = async (req: Request, res: Response, next:
         next(err);
     }
 }
+
+*/

@@ -5,7 +5,9 @@ import { EC } from "../../../core/errors/error-codes";
 import { CreateProductDTO } from "../dto/create-product.dto";
 import { UpdateProductDTO } from "../dto/update-product.dto";
 import { Prisma } from "@prisma/client";
-import { cloudinaryUpload } from "../../../core/utils/cloudinary.util";
+import { cloudinaryUpload, cloudinaryRemove } from "../../../core/utils/cloudinary.util";
+
+/*
 
 // CREATE PRODUCT
 export const createProductService = async (
@@ -14,26 +16,29 @@ export const createProductService = async (
 ) => {
   const { name, price, stock, categoryId } = data;
 
-  // Validasi minimal manual
-  if (!name || !price || !categoryId) {
-    throw badRequest("Missing required fields", EC.BAD_REQUEST);
+  // --- VALIDASI FILE ---
+  if (files && files.length > 5) {
+    throw badRequest("Maximum 5 images allowed", EC.BAD_REQUEST);
   }
 
-  // Upload semua file ke Cloudinary (jika ada)
+  // --- UPLOAD GAMBAR KE CLOUDINARY ---
   let uploadedImages: string[] = [];
   if (files && files.length > 0) {
     try {
-      const uploadPromises = files.map((file) =>
-        cloudinaryUpload(file, undefined, "products")
+      const uploadResults = await Promise.all(
+        files.map((file) => cloudinaryUpload(file, undefined, "products"))
       );
-      const results = await Promise.all(uploadPromises);
-      uploadedImages = results.map((res) => res.secure_url);
+      uploadedImages = uploadResults.map((res) => res.secure_url);
     } catch (error) {
-      throw internalError("Failed to upload product images", EC.INTERNAL_SERVER_ERROR, error);
+      throw internalError(
+        "Failed to upload product images",
+        EC.INTERNAL_SERVER_ERROR,
+        error
+      );
     }
   }
 
-  // Transaksi Prisma: create product + image
+  // --- CREATE PRODUCT DALAM TRANSAKSI ---
   const newProduct = await prisma.$transaction(async (tx) => {
     const product = await tx.product.create({
       data: {
@@ -41,20 +46,24 @@ export const createProductService = async (
         price,
         stock,
         categoryId,
-        images:
-          uploadedImages.length > 0
-            ? {
-                create: uploadedImages.map((url) => ({ url })),
-              }
-            : undefined,
-      },
-      include: {
-        category: true,
-        images: true,
       },
     });
 
-    return product;
+    if (uploadedImages.length > 0) {
+      await tx.productImage.createMany({
+        data: uploadedImages.map((url) => ({
+          productId: product.id,
+          url,
+        })),
+      });
+    }
+
+    const fullProduct = await tx.product.findUnique({
+      where: { id: product.id },
+      include: { category: true, images: true },
+    });
+
+    return fullProduct!;
   });
 
   return newProduct;
@@ -112,29 +121,67 @@ export const getProductByIdService = async (id: number) => {
 };
 
 // UPDATE PRODUCT
-export const updateProductService = async (id: number, data: UpdateProductDTO) => {
+export const updateProductService = async (
+  id: number,
+  data: UpdateProductDTO,
+  files?: Express.Multer.File[]
+) => {
   const product = await prisma.product.findFirst({
     where: { id, isDeleted: false },
+    include: { images: true },
   });
+
   if (!product) throw notFound("Product not found", EC.NOT_FOUND);
 
-  const { images, ...productData } = data;
+  // Jalankan transaksi agar aman kalau salah satu operasi gagal
+  return await prisma.$transaction(async (tx) => {
+    let uploadedImages: string[] = [];
 
-  const updatedProduct = await prisma.product.update({
-    where: { id },
-    data: {
-      ...productData,
-      ...(images && {
-        images: {
-          deleteMany: {}, // hapus semua gambar lama
-          create: images.map((url) => ({ url })),
-        },
-      }),
-    },
-    include: { category: true, images: true },
+    // === HANDLE FILE UPLOAD ===
+    if (files && files.length > 0) {
+      // Hapus gambar lama dari Cloudinary (jika ada)
+      for (const oldImage of product.images) {
+        try {
+          await cloudinaryRemove(oldImage.url);
+        } catch (err) {
+          console.warn("Failed to remove old image:", oldImage.url);
+        }
+      }
+
+      // Upload gambar baru ke Cloudinary
+      const uploadResults = await Promise.all(
+        files.map((file) => cloudinaryUpload(file, undefined, "products"))
+      );
+      uploadedImages = uploadResults.map((res) => res.secure_url);
+
+      // Hapus data image lama dari DB
+      await tx.productImage.deleteMany({ where: { productId: id } });
+
+      // Simpan data image baru
+      await tx.productImage.createMany({
+        data: uploadedImages.map((url) => ({
+          productId: id,
+          url,
+        })),
+      });
+    }
+
+    // === UPDATE PRODUCT DATA ===
+    const { images, ...productData } = data;
+
+    const updatedProduct = await tx.product.update({
+      where: { id },
+      data: {
+        ...productData,
+      },
+      include: {
+        category: true,
+        images: true,
+      },
+    });
+
+    return updatedProduct;
   });
-
-  return updatedProduct;
 };
 
 // SOFT DELETE PRODUCT
@@ -151,3 +198,5 @@ export const deleteProductService = async (id: number) => {
 
   return { message: "Product soft deleted successfully" };
 };
+
+*/
