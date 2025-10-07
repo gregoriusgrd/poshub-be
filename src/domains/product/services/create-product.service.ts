@@ -1,64 +1,43 @@
 import prisma from "../../../config/prisma";
 import { badRequest, internalError } from "../../../core/errors/http-error";
 import { EC } from "../../../core/errors/error-codes";
-import { CreateProductDTO } from "../dto/create-product.dto";
+import { CreateProductDTO } from "../dto/product.dto";
 import { cloudinaryUpload } from "../../../core/utils/cloudinary.util";
 
 // CREATE PRODUCT
 export const createProductService = async (
   data: CreateProductDTO,
-  files?: Express.Multer.File[]
+  file?: Express.Multer.File // hanya 1 file
 ) => {
   const { name, price, stock, categoryId } = data;
 
-  // --- VALIDASI FILE ---
-  if (files && files.length > 5) {
-    throw badRequest("Maximum 5 images allowed", EC.BAD_REQUEST);
+  // validasi input
+  if (!file) {
+    throw badRequest("Product image is required", EC.BAD_REQUEST);
   }
 
-  // --- UPLOAD GAMBAR KE CLOUDINARY ---
-  let uploadedImages: string[] = [];
-  if (files && files.length > 0) {
+  // upload image ke Cloudinary
+  let uploadedUrl: string | null = null;
     try {
-      const uploadResults = await Promise.all(
-        files.map((file) => cloudinaryUpload(file, undefined, "products"))
-      );
-      uploadedImages = uploadResults.map((res) => res.secure_url);
+      const uploadResult = await cloudinaryUpload(file, "products");
+      uploadedUrl = uploadResult.secure_url;
     } catch (error) {
       throw internalError(
-        "Failed to upload product images",
+        "Failed to upload product image",
         EC.INTERNAL_SERVER_ERROR,
         error
       );
-    }
   }
 
-  // --- CREATE PRODUCT DALAM TRANSAKSI ---
-  const newProduct = await prisma.$transaction(async (tx) => {
-    const product = await tx.product.create({
-      data: {
-        name,
-        price,
-        stock,
-        categoryId,
-      },
-    });
-
-    if (uploadedImages.length > 0) {
-      await tx.productImage.createMany({
-        data: uploadedImages.map((url) => ({
-          productId: product.id,
-          url,
-        })),
-      });
-    }
-
-    const fullProduct = await tx.product.findUnique({
-      where: { id: product.id },
-      include: { category: true, images: true },
-    });
-
-    return fullProduct!;
+  const newProduct = await prisma.product.create({
+    data: {
+      name,
+      price,
+      stock,
+      categoryId,
+      imageUrl: uploadedUrl,
+    },
+    include: { category: true }
   });
 
   return newProduct;

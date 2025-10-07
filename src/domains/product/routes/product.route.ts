@@ -26,10 +26,10 @@ router.get("/:id", getProductByIdController);
  * hanya admin yg boleh manage produk
 */
 
-router.use(requireAuth, requireRole([Role.ADMIN]));
+router.use(requireRole([Role.ADMIN]));
 
-router.post("/", uploaderRules.productImages.array("images", 5), createProductController);
-router.put("/:id", uploaderRules.productImages.array("images", 5), updateProductController);
+router.post("/", uploaderRules.productImage.single("image"), createProductController);
+router.put("/:id", uploaderRules.productImage.single("image"), updateProductController);
 router.delete("/:id", deleteProductController);
 
 export default router;

@@ -3,16 +3,21 @@ import { getAllProductsService } from "../services/get-all-product.service";
 
 export const getAllProductsController = async (req: Request, res: Response, next: NextFunction) => {
     try {
-        const pagination = {
-            page: Number(req.query.page) || 1,
-            limit: Number(req.query.limit) || 10,
-            search: req.query.search?.toString(),
-            categoryId: req.query.categoryId ? Number(req.query.categoryId) : undefined,
-            sortBy: req.query.sortBy as "name" | "price" | "createdAt" | undefined,
-            order: req.query.sortOrder as "asc" | "desc" | undefined,
-        };
+        const page = Number(req.query.page) || 1;
+        const limit = Number(req.query.limit) || 10;
+        const search = req.query.search?.toString();
+        const categoryId = req.query.categoryId ? Number(req.query.categoryId) : undefined;
 
-        const products = await getAllProductsService(pagination);
+        const sortBy =
+            req.query.sortBy === "name" ||
+            req.query.sortBy === "price" ||
+            req.query.sortBy === "createdAt"
+                ? req.query.sortBy
+                : "createdAt";
+        
+        const order = req.query.order === "asc" || req.query.order === "desc" ? req.query.order : "desc";
+
+        const products = await getAllProductsService({ page, limit, search, categoryId, sortBy, order });
 
         return res.status(200).json({
             success: true,

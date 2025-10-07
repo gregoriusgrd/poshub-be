@@ -23,7 +23,7 @@ export const getAllProductsService = async (query: {
   const [data, total] = await Promise.all([
     prisma.product.findMany({
       where,
-      include: { category: true, images: true },
+      include: { category: true },
       skip,
       take,
       orderBy: { [sortBy]: order },

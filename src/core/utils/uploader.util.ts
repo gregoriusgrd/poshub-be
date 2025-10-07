@@ -1,11 +1,9 @@
 import multer from "multer";
 
-// dari project lama
-
 // MIME type yang diperbolehkan
 const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
 
-// Helper untuk membuat konfigurasi multer dengan memory storage
+// Helper untuk konfigurasi multer dengan memory storage
 const memoryUploader = (options: { allowedTypes: string[]; maxSizeMB: number }) => {
   return multer({
     storage: multer.memoryStorage(),
@@ -22,17 +20,17 @@ const memoryUploader = (options: { allowedTypes: string[]; maxSizeMB: number }) 
   });
 };
 
-// Rules uploader khusus untuk kebutuhan Cashier App
+// Rules uploader khusus Cashier App
 export const uploaderRules = {
-  // Hanya untuk upload 1 foto profil (Admin atau Cashier)
+  // Upload 1 foto profil (Admin atau Cashier)
   profileImage: memoryUploader({
     allowedTypes: allowedImageTypes,
-    maxSizeMB: 2, // kecil karena cuma foto profil
+    maxSizeMB: 1, // 1 MB cukup untuk foto profil
   }),
 
-  // Untuk upload beberapa gambar produk
-  productImages: memoryUploader({
+  // Upload 1 gambar produk
+  productImage: memoryUploader({
     allowedTypes: allowedImageTypes,
-    maxSizeMB: 10, // lebih besar karena bisa banyak
+    maxSizeMB: 1, // 1 MB juga cukup untuk produk
   }),
 };

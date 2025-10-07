@@ -7,13 +7,13 @@ import { createProductService } from "../services/create-product.service";
 export const createProductController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const data = createProductSchema.parse(req.body);
-    const files = req.files as Express.Multer.File[] | undefined;
+    const file = req.file as Express.Multer.File | undefined;
 
-    if (files && files.length > 5) {
-        throw badRequest("Maximum 5 images allowed", EC.BAD_REQUEST);
+    if (!file) {
+        throw badRequest("Product image is required", EC.BAD_REQUEST);
     }
 
-    const newProduct = await createProductService(data, files);
+    const newProduct = await createProductService(data, file);
 
     return res.status(201).json({
       success: true,

@@ -1,8 +1,6 @@
 import { v2 as cloudinary, UploadApiResponse } from "cloudinary";
 import * as streamifier from "streamifier";
 
-// dari project lama
-
 // === CONFIG ===
 cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
@@ -10,35 +8,26 @@ cloudinary.config({
   api_secret: process.env.CLOUDINARY_API_SECRET,
 });
 
-// === UPLOAD ===
+// === UPLOAD SINGLE IMAGE ===
 export const cloudinaryUpload = (
   file: Express.Multer.File,
-  publicId?: string,    // Optional standardized name
-  folder?: string    // Optional folder name 
+  folder?: string
 ): Promise<UploadApiResponse> => {
   return new Promise((resolve, reject) => {
     const uploadStream = cloudinary.uploader.upload_stream(
       {
-        public_id: publicId,
-        folder, // Cloudinary will auto-create folder
-        resource_type: "image", // optional: force image type
-        overwrite: true, // overwrite if same public_id exists
+        folder,
+        resource_type: "image",
       },
       (error, result) => {
         if (error) return reject(error);
         resolve(result as UploadApiResponse);
       }
     );
+
     streamifier.createReadStream(file.buffer).pipe(uploadStream);
   });
 };
-
-/**
- * Extract Cloudinary public_id dari URL (robust, termasuk folder).
- * Mendukung folder + versi Cloudinary di URL:
- * https://res.cloudinary.com/<cloud>/image/upload/v123/folder/sub/abc123.jpg
- * -> "folder/sub/abc123"
- */
 
 // === EXTRACT PUBLIC ID ===
 const extractPublicIdFromUrl = (url: string): string => {
@@ -58,27 +47,15 @@ const extractPublicIdFromUrl = (url: string): string => {
     const filenameNoExt = last.replace(/\.[^/.]+$/, "");
     const folders = parts.slice(startIdx, parts.length - 1);
 
-    const publicId = [...folders, filenameNoExt].join("/");
-    if (!publicId) throw new Error("Empty public_id");
-    return publicId;
+    return [...folders, filenameNoExt].join("/");
   } catch {
-    // fallback jika URL tidak standar
     const parts = url.split("/");
-    const filename = parts[parts.length - 1]?.split(".")[0] ?? "";
-    return filename;
+    return parts[parts.length - 1]?.split(".")[0] ?? "";
   }
 };
 
-// === DELETE ===
-
-// Delete image from cloudinary using the public ID extracted from the URL
+// === DELETE SINGLE IMAGE ===
 export const cloudinaryRemove = async (secureUrl: string) => {
   const publicId = extractPublicIdFromUrl(secureUrl);
-  return await cloudinary.uploader.destroy(publicId, { resource_type: "image" });
-};
-
-// Remove image by public_id directly
-export const cloudinaryRemoveByPublicId = async (publicId: string) => {
-  if (!publicId) throw new Error("publicId is required");
   return cloudinary.uploader.destroy(publicId, { resource_type: "image" });
 };

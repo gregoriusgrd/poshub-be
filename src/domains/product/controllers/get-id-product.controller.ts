@@ -4,7 +4,10 @@ import { getProductByIdService } from "../services/get-id-product.service";
 
 export const getProductByIdController = async (req: Request, res: Response, next: NextFunction) => {
     try {
+        // validasi & parsing id
         const { id } = productIdSchema.parse(req.params);
+
+        // ambil data product dari service
         const product = await getProductByIdService(id);
 
         return res.json({
