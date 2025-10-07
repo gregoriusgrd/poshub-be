@@ -10,7 +10,7 @@ interface GetAllCategoriesParams {
 export const getAllCategoriesService = async ({
   page,
   limit,
-  search = "",
+  search,
 }: GetAllCategoriesParams) => {
   const { skip, take, page: currentPage, limit: perPage } = getPagination({
     page,
@@ -18,10 +18,12 @@ export const getAllCategoriesService = async ({
   });
 
   const where = {
-    name: {
-      contains: search,
-      mode: "insensitive" as const,
-    },
+    ...(search && {
+      name: {
+        contains: search,
+        mode: "insensitive" as const,
+      },
+    }),
   };
 
   const [data, total] = await Promise.all([
