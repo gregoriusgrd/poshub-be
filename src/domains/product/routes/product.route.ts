@@ -11,6 +11,8 @@ import { deleteProductController } from "../controllers/delete-product.controlle
 
 const router = Router();
 
+router.use(requireAuth);
+
 /**
  * PUBLIC ROUTES
  * bisa diakses kasir untuk melihat produk

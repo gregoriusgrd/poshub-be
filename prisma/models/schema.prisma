@@ -25,12 +25,32 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  // Relations
-  shifts       Shift[]
-  transactions Transaction[]
+  // admin
+  cashiers    Cashier[]     @relation("AdminCashiers")
+  categories  Category[]    @relation("AdminCategories")
+  products    Product[]     @relation("AdminProducts")
+  Transaction Transaction[]
 
   @@index([role, isDeleted]) // filter by role and active status
   @@index([isDeleted]) // filter by active users
+  @@index([fullName, isDeleted]) // search by name
+  @@index([email, isDeleted]) // filter by email and active status
+}
+
+model Cashier {
+  id        Int     @id @default(autoincrement())
+  fullName  String
+  email     String  @unique
+  password  String
+  isDeleted Boolean @default(false)
+
+  // Relations
+  adminId Int
+  admin   User @relation("AdminCashiers", fields: [adminId], references: [id])
+
+  shifts Shift[]
+
+  @@index([adminId, isDeleted]) // filter by admin
   @@index([fullName, isDeleted]) // search by name
   @@index([email, isDeleted]) // filter by email and active status
 }
@@ -54,7 +74,7 @@ model Shift {
   // Relations
   status       ShiftStatus   @default(OPEN)
   cashierId    Int
-  cashier      User          @relation(fields: [cashierId], references: [id])
+  cashier      Cashier       @relation(fields: [cashierId], references: [id])
   transactions Transaction[]
 
   @@index([cashierId]) // filter by cashier
@@ -63,20 +83,25 @@ model Shift {
 }
 
 model Product {
-  id           Int     @id @default(autoincrement())
-  name         String
-  price        Float
-  stock        Int
-  isDeleted    Boolean @default(false)
+  id        Int     @id @default(autoincrement())
+  name      String
+  price     Float
+  stock     Int
+  isDeleted Boolean @default(false)
 
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
   // Relations
-  categoryId       Int
-  category         Category          @relation(fields: [categoryId], references: [id])
+  categoryId Int
+  category   Category @relation(fields: [categoryId], references: [id])
+
+  // Admin
+  adminId Int
+  admin   User @relation("AdminProducts", fields: [adminId], references: [id])
+
   transactionItems TransactionItem[]
-  images          ProductImage[]
+  images           ProductImage[]
 
   @@index([price]) // filter by price range
   @@index([name]) // search by name
@@ -84,14 +109,14 @@ model Product {
 }
 
 model ProductImage {
-  id       Int     @id @default(autoincrement())
+  id        Int     @id @default(autoincrement())
   url       String
-  publicId String? @unique @db.VarChar(255)
+  publicId  String? @unique @db.VarChar(255)
   isPrimary Boolean @default(false)
 
   // Relations
   productId Int
-  product Product @relation(fields: [productId], references: [id])
+  product   Product @relation(fields: [productId], references: [id])
 
   @@index([productId]) // filter by product
 }
@@ -106,6 +131,10 @@ model Category {
 
   // Relations
   products Product[]
+
+  // Admin
+  adminId Int
+  admin   User @relation("AdminCategories", fields: [adminId], references: [id])
 
   @@index([name]) // search by name
   @@index([isDeleted]) // filter by active categories
@@ -135,6 +164,7 @@ model Transaction {
   @@index([shiftId]) // filter by shift
   @@index([transactionTime]) // filter by date range
   @@index([paymentMethod]) // filter by payment method
+  @@index([cashierId, transactionTime]) // filter by cashier and date range
 }
 
 model TransactionItem {

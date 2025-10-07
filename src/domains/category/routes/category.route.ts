@@ -10,6 +10,8 @@ import { deleteCategoryController } from "../controllers/delete-category.control
 
 const router = Router();
 
+router.use(requireAuth);
+
 /**
  * PUBLIC ROUTES
  * Bisa diakses kasir/admin untuk melihat kategori
