@@ -50,6 +50,9 @@ model Cashier {
 
   shifts Shift[]
 
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
   @@index([adminId, isDeleted]) // filter by admin
   @@index([fullName, isDeleted]) // search by name
   @@index([email, isDeleted]) // filter by email and active status

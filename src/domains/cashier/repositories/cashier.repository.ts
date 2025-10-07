@@ -1,34 +1,38 @@
-import { Role, User } from "@prisma/client";
+import { Role, User, Cashier } from "@prisma/client";
 import prisma from "../../../config/prisma";
-import { CreateCashierDTO } from "../dto/create-cashier.dto";
-import { UpdateCashierDTO } from "../dto/update-cashier.dto";
+import { CreateCashierDTO, UpdateCashierDTO } from "../dto/cashier.dto";
 
 // Create a new cashier
 
-export const createCashier = async (data: CreateCashierDTO): Promise<User> => {
-    return await prisma.user.create({
+export const createCashier = async (data: CreateCashierDTO): Promise<Cashier> => {
+    return await prisma.cashier.create({
         data: {
             email: data.email,
             password: data.password,
             fullName: data.fullName,
-            role: Role.CASHIER,
+            adminId: data.adminId,
         },
     });
 };
 
 // Get all cashiers
 
-export const getAllCashiers = async(): Promise<User[]> => {
-    return await prisma.user.findMany({
-        where: { role: Role.CASHIER },
+export const getAllCashiers = async (adminId: number, options?: { skip?: number; take?: number }): Promise<Cashier[]> => {
+    return await prisma.cashier.findMany({
+        where: { 
+            adminId,
+            isDeleted: false,
+        },
         orderBy: { createdAt: 'desc' },
+        skip: options?.skip,
+        take: options?.take,
     });
 };
 
 // Find a cashier by ID
 
-export const findCashierById = async (id: number): Promise<User | null> => {
-    return await prisma.user.findUnique({
+export const findCashierById = async (id: number): Promise<Cashier | null> => {
+    return await prisma.cashier.findUnique({
         where: { id },
     });
 };
@@ -49,18 +53,18 @@ export const findActiveCashiers = async (options?: { skip?: number; take?: numbe
 
 // Update a cashier by ID
 
-export const updateCashier = async (id: number, data: UpdateCashierDTO): Promise<User> => {
-    return await prisma.user.update({
+export const updateCashier = async (id: number, data: UpdateCashierDTO): Promise<Cashier> => {
+    return await prisma.cashier.update({
         where: { id },
         data,
     });
-}
+};
 
 // Soft delete a cashier by ID
 
-export const softDeleteCashier = async (id: number): Promise<User> => {
-    return await prisma.user.update({
+export const softDeleteCashier = async (id: number): Promise<Cashier> => {
+    return await prisma.cashier.update({
         where: { id },
-        data: { isDeleted: true }, // soft delete di schema
+        data: { isDeleted: true },
     });
 };
