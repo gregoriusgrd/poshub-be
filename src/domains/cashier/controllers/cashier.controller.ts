@@ -1,6 +1,5 @@
 import { Request, Response, NextFunction } from "express";
-import { CreateCashierDTO } from "../dto/create-cashier.dto";
-import { UpdateCashierDTO } from "../dto/update-cashier.dto";
+import { CreateCashierDTO, UpdateCashierDTO } from "../dto/cashier.dto";
 import {
   createCashierService,
   getAllCashiersService,
@@ -13,8 +12,8 @@ import {
 export const createCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const dto: CreateCashierDTO = req.body;
-    const adminId = req.user!.userId; // pastikan auth middleware menambahkan req.user
-    const cashier = await createCashierService(dto, adminId);
+    const cashier = await createCashierService(dto);
+
     return res.json({
       success: true,
       message: "Cashier created successfully",
@@ -28,8 +27,8 @@ export const createCashierController = async (req: Request, res: Response, next:
 // GET all Cashiers for the admin
 export const getAllCashiersController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const adminId = req.user!.userId;
-    const cashiers = await getAllCashiersService(adminId, req.query);
+    const cashiers = await getAllCashiersService(req.query);
+
     return res.json({
       success: true,
       message: "Cashiers retrieved successfully",
@@ -44,8 +43,8 @@ export const getAllCashiersController = async (req: Request, res: Response, next
 export const getCashierByIdController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
-    const adminId = req.user!.userId;
-    const cashier = await getCashierByIdService(id, adminId);
+    const cashier = await getCashierByIdService(id);
+
     return res.json({
       success: true,
       message: "Cashier retrieved successfully",
@@ -61,8 +60,8 @@ export const updateCashierController = async (req: Request, res: Response, next:
   try {
     const id = Number(req.params.id);
     const dto: UpdateCashierDTO = req.body;
-    const adminId = req.user!.userId;
-    const updatedCashier = await updateCashierService(id, dto, adminId);
+    const updatedCashier = await updateCashierService(id, dto);
+    
     return res.json({
       success: true,
       message: "Cashier updated successfully",
@@ -77,8 +76,8 @@ export const updateCashierController = async (req: Request, res: Response, next:
 export const deleteCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
-    const adminId = req.user!.userId;
-    const deletedCashier = await deleteCashierService(id, adminId);
+    const deletedCashier = await deleteCashierService(id);
+    
     return res.json({
       success: true,
       message: "Cashier deleted successfully",

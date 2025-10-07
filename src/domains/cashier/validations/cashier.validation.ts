@@ -2,14 +2,15 @@ import { z } from 'zod';
 
 // Reusable schemas
 
+const usernameSchema = z.string()
+.trim()
+.min(3, { message: "Username must be at least 3 characters long" })
+.max(30, { message: "Username must be at most 30 characters long" })
+.transform((username) => username.toLowerCase());
+
 const fullNameSchema = z.string()
   .min(3, { message: "Full name must be at least 3 characters long" })
   .max(50, { message: "Full name must be at most 50 characters long" });
-
-const emailSchema = z.string()
-  .trim()
-  .email({ message: "Invalid email address" })
-  .transform((email) => email.toLowerCase());
 
 const passwordSchema = z.string()
   .trim()
@@ -19,24 +20,22 @@ const passwordSchema = z.string()
 // CREATE Cashier
 
 export const createCashierSchema = z.object({
+  username: usernameSchema,
   fullName: fullNameSchema,
-  email: emailSchema,
   password: passwordSchema,
-  profilePicture: z.string().url().optional(),
 });
 
 // UPDATE Cashier
 
 export const updateCashierSchema = z.object({
   fullName: fullNameSchema.optional(),
-  email: emailSchema.optional(),
   password: passwordSchema.optional(),
   profilePicture: z.string().url().optional(),
 });
 
-// GET ONE Cashier (by id)
+// GET Cashier (by id)
 
-export const getOneCashierSchema = z.object({
+export const getCashierByIdSchema = z.object({
   id: z.string().regex(/^\d+$/, "Id must be a number"),
 });
 

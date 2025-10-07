@@ -1,12 +1,12 @@
 export interface CreateCashierDTO {
-    email: string;
+    username: string;
     password: string;
     fullName: string;
-    adminId: number; // karena cashier harus terkait admin
 }
 
+// tidak bisa ganti username
+
 export interface UpdateCashierDTO {
-    email?: string;
     password?: string;
     fullName?: string;
     profilePicture?: string;
