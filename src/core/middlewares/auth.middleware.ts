@@ -1,7 +1,7 @@
 import  { Request, Response, NextFunction } from "express";
 import { verifyJwtToken } from "../utils/jwt.util";
 import { unauthorized } from "../errors/http-error";
-import { TokenPayload } from "../types/jwt.types";
+import { TokenPayload } from "../../domains/auth/validations/auth.validations";
 import { logger } from "../../config/logger";
 
 // Middleware untuk melindungi route yang membutuhkan autentikasi

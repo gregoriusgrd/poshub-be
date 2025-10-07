@@ -1,7 +1,7 @@
 import jwt from "jsonwebtoken";
 import { config } from "dotenv";
 import { env } from "../../config/env";
-import { TokenPayload } from "../types/jwt.types";
+import { TokenPayload } from "../../domains/auth/validations/auth.validations";
 
 config();
 

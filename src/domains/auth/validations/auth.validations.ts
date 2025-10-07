@@ -3,33 +3,39 @@ import { Role } from '@prisma/client';
 
 // Reusable schemas
 
-const emailSchema = z.string()
+const usernameSchema = z.string()
   .trim()
-  .email({ message: "Invalid email address" })
-  .transform((email) => email.toLowerCase());
+  .min(2, { message: "Username must be at least 2 characters long" })
+  .max(30, { message: "Username must be at most 30 characters long" })
+  .transform((username) => username.toLowerCase());
 
 const passwordSchema = z.string()
   .trim()
   .min(6, { message: "Password must be at least 6 characters long" })
   .max(50, { message: "Password must be at most 50 characters long" });
 
-// Login and Register schemas
+// Login schemas
 
 export const loginSchema = z.object({
-    email: emailSchema,
+    username: usernameSchema,
     password: passwordSchema,
 })
 .strict();
 
-export const registerSchema = z.object({
-    email: emailSchema,
-    password: passwordSchema,
-    role: z.enum(["ADMIN", "CASHIER"]),
-    fullName: z.string().min(1).max(100)
+export const changePasswordSchema = z.object({
+    oldPassword: passwordSchema.optional(),
+    newPassword: passwordSchema,
 })
 .strict();
 
-// ini sementara saja, nanti dihapus
+export const updateProfileSchema = z.object({
+    fullName: z.string().min(1).max(50).optional(),
+    password: passwordSchema.optional(),
+    profilePicture: z.string().url().optional(),
+})
+.strict();
+
+// ini sementara saja, nanti dipindah
 
 export interface TokenPayload {
   userId: number;
