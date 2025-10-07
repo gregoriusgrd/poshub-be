@@ -10,11 +10,11 @@ import {
 } from "../services/cashier.service";
 
 // CREATE Cashier
-
-export const createCashierController = async ( req: Request, res: Response, next: NextFunction) => {
+export const createCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const dto: CreateCashierDTO = req.body;
-    const cashier = await createCashierService(dto);
+    const adminId = req.user!.userId; // pastikan auth middleware menambahkan req.user
+    const cashier = await createCashierService(dto, adminId);
     return res.json({
       success: true,
       message: "Cashier created successfully",
@@ -25,11 +25,11 @@ export const createCashierController = async ( req: Request, res: Response, next
   }
 };
 
-// GET all Cashier
-
-export const getAllCashiersController = async ( req: Request, res: Response, next: NextFunction) => {
+// GET all Cashiers for the admin
+export const getAllCashiersController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const cashiers = await getAllCashiersService(req.query);
+    const adminId = req.user!.userId;
+    const cashiers = await getAllCashiersService(adminId, req.query);
     return res.json({
       success: true,
       message: "Cashiers retrieved successfully",
@@ -40,12 +40,12 @@ export const getAllCashiersController = async ( req: Request, res: Response, nex
   }
 };
 
-// GET Cashier by ID
-
-export const getCashierByIdController = async ( req: Request, res: Response, next: NextFunction) => {
+// GET Cashier by ID (belongs to admin)
+export const getCashierByIdController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
-    const cashier = await getCashierByIdService(id);
+    const adminId = req.user!.userId;
+    const cashier = await getCashierByIdService(id, adminId);
     return res.json({
       success: true,
       message: "Cashier retrieved successfully",
@@ -56,13 +56,13 @@ export const getCashierByIdController = async ( req: Request, res: Response, nex
   }
 };
 
-// UPDATE Cashier
-
-export const updateCashierController = async ( req: Request, res: Response, next: NextFunction) => {
+// UPDATE Cashier (belongs to admin)
+export const updateCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
     const dto: UpdateCashierDTO = req.body;
-    const updatedCashier = await updateCashierService(id, dto);
+    const adminId = req.user!.userId;
+    const updatedCashier = await updateCashierService(id, dto, adminId);
     return res.json({
       success: true,
       message: "Cashier updated successfully",
@@ -73,12 +73,12 @@ export const updateCashierController = async ( req: Request, res: Response, next
   }
 };
 
-// SOFT DELETE Cashier
-
-export const deleteCashierController = async ( req: Request, res: Response, next: NextFunction) => {
+// SOFT DELETE Cashier (belongs to admin)
+export const deleteCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
-    const deletedCashier = await deleteCashierService(id);
+    const adminId = req.user!.userId;
+    const deletedCashier = await deleteCashierService(id, adminId);
     return res.json({
       success: true,
       message: "Cashier deleted successfully",

@@ -1,4 +1,4 @@
-import { Role, User, Cashier } from "@prisma/client";
+import { Cashier } from "@prisma/client";
 import prisma from "../../../config/prisma";
 import { CreateCashierDTO, UpdateCashierDTO } from "../dto/cashier.dto";
 
@@ -31,24 +31,10 @@ export const getAllCashiers = async (adminId: number, options?: { skip?: number;
 
 // Find a cashier by ID
 
-export const findCashierById = async (id: number): Promise<Cashier | null> => {
-    return await prisma.cashier.findUnique({
-        where: { id },
-    });
-};
-
-// Find Active Cashiers
-
-export const findActiveCashiers = async (options?: { skip?: number; take?: number }): Promise<User[]> => {
-    return await prisma.user.findMany({
-        where: {
-            role: Role.CASHIER,
-            isDeleted: false,
-        },
-        orderBy: { createdAt: 'desc' },
-        skip: options?.skip,
-        take: options?.take,
-    });
+export const findCashierById = async (id: number, adminId?: number): Promise<Cashier | null> => {
+  return await prisma.cashier.findFirst({
+    where: { id, ...(adminId && { adminId }) },
+  });
 };
 
 // Update a cashier by ID
