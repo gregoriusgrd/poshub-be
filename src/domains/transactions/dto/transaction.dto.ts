@@ -1,7 +1,7 @@
 export interface TransactionItemDTO {
     productId: number;
     quantity: number;
-    subtotal: number;
+    subtotal?: number;
 }
 
 export interface CreateTransactionDTO {

@@ -19,7 +19,7 @@ export const createTransactionItems = (transactionId: number, items: Transaction
         transactionId,
         productId: item.productId,
         quantity: item.quantity,
-        subtotal: item.subtotal,
+        subtotal: item.subtotal ?? 0,
     }));
     return prisma.transactionItem.createMany({ data });
 };
