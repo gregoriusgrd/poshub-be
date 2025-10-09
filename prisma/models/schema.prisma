@@ -107,6 +107,8 @@ model Transaction {
   shiftId         Int
   totalAmount     Decimal       @db.Decimal(12, 2)
   transactionTime DateTime      @default(now())
+  paymentAmount   Decimal?       @db.Decimal(12, 2) // uang yg dibayar
+  changeAmount    Decimal?       @db.Decimal(12, 2) // kembalian
   paymentMethod   PaymentMethod
 
   createdAt DateTime @default(now())

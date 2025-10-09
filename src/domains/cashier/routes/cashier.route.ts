@@ -18,12 +18,12 @@ router.post("/", validateRequest(createCashierSchema), createCashierController);
 router.get("/", getAllCashiersController);
 
 // GET one cashier by ID
-router.get("/:id", validateRequest(getCashierByIdSchema), getCashierByIdController);
+router.get("/:id", getCashierByIdController);
 
 // UPDATE cashier by ID
 router.put("/:id", validateRequest(updateCashierSchema), updateCashierController);
 
 // DELETE cashier by ID (soft delete)
-router.delete("/:id", validateRequest(deleteCashierSchema), deleteCashierController);
+router.delete("/:id", deleteCashierController);
 
 export default router;

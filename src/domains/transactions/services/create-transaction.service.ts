@@ -5,6 +5,12 @@ import { CreateTransactionDTO, TransactionItemDTO } from "../dto/transaction.dto
 export const createTransactionService = async ( cashierId: number, data: CreateTransactionDTO ) => {
   const { shiftId, items, paymentAmount, paymentMethod } = data;
 
+  // Validasi shift
+  const shift = await prisma.shift.findUnique({ where: { id: shiftId } });
+  if (!shift) throw notFound("Shift not found");
+  if (shift.status !== "OPEN")
+    throw badRequest("Cannot create transaction: shift is closed");
+
   if (items.length === 0)
     throw badRequest("Transaction must have at least one item");
 
