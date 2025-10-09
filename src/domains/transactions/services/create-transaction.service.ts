@@ -43,6 +43,8 @@ export const createTransactionService = async ( cashierId: number, data: CreateT
     throw badRequest("Cash payment is less than total amount");
   }
 
+  const changeAmount = paymentMethod === "CASH" ? paymentAmount - totalAmount : 0;
+
   // 4. Simpan transaksi dan transactionItems secara atomic
   const transaction = await prisma.$transaction(async (tx) => {
 
@@ -52,6 +54,8 @@ export const createTransactionService = async ( cashierId: number, data: CreateT
         cashierId,
         shiftId,
         totalAmount,
+        paymentAmount,
+        changeAmount,
         paymentMethod,
       },
     });

@@ -2,12 +2,21 @@ import prisma from "../../../config/prisma";
 import { TransactionItemDTO } from "../dto/transaction.dto";
 
 // Create a new transaction
-export const createTransaction = (shiftId: number, cashierId: number, totalAmount: number, paymentMethod: "CASH" | "DEBIT_CARD") => {
+export const createTransaction = (
+    shiftId: number, 
+    cashierId: number, 
+    totalAmount: number, 
+    paymentAmount: number,
+    changeAmount: number,
+    paymentMethod: "CASH" | "DEBIT_CARD"
+) => {
     return prisma.transaction.create({
         data: {
             shiftId,
             cashierId,
             totalAmount,
+            paymentAmount,
+            changeAmount,
             paymentMethod
         }
     });
