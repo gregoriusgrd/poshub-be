@@ -2,8 +2,6 @@ import { Router } from "express";
 import { requireAuth } from "../../../core/middlewares/auth.middleware";
 import { requireRole } from "../../../core/middlewares/role.middleware";
 import { Role } from "@prisma/client";
-import { validateRequest } from "../../../core/middlewares/validate.middleware";
-import { createCashierSchema, deleteCashierSchema, getCashierByIdSchema, updateCashierSchema } from "../validations/cashier.validation";
 import { createCashierController, deleteCashierController, getAllCashiersController, getCashierByIdController, updateCashierController } from "../controllers/cashier.controller";
 
 const router = Router();
@@ -12,7 +10,7 @@ const router = Router();
 router.use(requireAuth, requireRole([Role.ADMIN]))
 
 // CREATE cashier
-router.post("/", validateRequest(createCashierSchema), createCashierController);
+router.post("/", createCashierController);
 
 // GET all cashier (pagination > /cashiers?page=2&limit=10)
 router.get("/", getAllCashiersController);
@@ -21,7 +19,7 @@ router.get("/", getAllCashiersController);
 router.get("/:id", getCashierByIdController);
 
 // UPDATE cashier by ID
-router.put("/:id", validateRequest(updateCashierSchema), updateCashierController);
+router.put("/:id", updateCashierController);
 
 // DELETE cashier by ID (soft delete)
 router.delete("/:id", deleteCashierController);

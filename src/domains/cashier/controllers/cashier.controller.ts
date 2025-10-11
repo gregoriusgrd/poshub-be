@@ -7,11 +7,12 @@ import {
   updateCashierService,
   deleteCashierService,
 } from "../services/cashier.service";
+import { createCashierSchema, updateCashierSchema } from "../validations/cashier.validation";
 
 // CREATE Cashier
 export const createCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const dto: CreateCashierDTO = req.body;
+    const dto: CreateCashierDTO = createCashierSchema.parse(req.body);
     const cashier = await createCashierService(dto);
 
     return res.json({
@@ -59,7 +60,7 @@ export const getCashierByIdController = async (req: Request, res: Response, next
 export const updateCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
-    const dto: UpdateCashierDTO = req.body;
+    const dto: UpdateCashierDTO = updateCashierSchema.parse(req.body);
     const updatedCashier = await updateCashierService(id, dto);
     
     return res.json({

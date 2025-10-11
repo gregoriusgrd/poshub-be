@@ -1,10 +1,11 @@
 import { Request, Response, NextFunction } from "express";
 import { updateProfileService } from "../services/update-profile.service";
+import { updateProfileSchema } from "../validations/auth.validations";
 
 export const updateProfileController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const userId = req.user!.userId; // requireAuth middleware
-    const { fullName, profilePicture, password } = req.body;
+    const { fullName, profilePicture, password } = updateProfileSchema.parse(req.body);
 
     const updatedUser = await updateProfileService({ userId, fullName, profilePicture, password });
 
