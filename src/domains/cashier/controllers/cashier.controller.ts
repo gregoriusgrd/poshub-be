@@ -8,6 +8,7 @@ import {
   deleteCashierService,
 } from "../services/cashier.service";
 import { createCashierSchema, updateCashierSchema } from "../validations/cashier.validation";
+import { logger } from "../../../config/logger";
 
 // CREATE Cashier
 export const createCashierController = async (req: Request, res: Response, next: NextFunction) => {
@@ -28,12 +29,14 @@ export const createCashierController = async (req: Request, res: Response, next:
 // GET all Cashiers for the admin
 export const getAllCashiersController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const cashiers = await getAllCashiersService(req.query);
+    logger.info("Fetching all cashiers with query params", req.query);
+    const result = await getAllCashiersService(req.query);
+    logger.info(`Retrieved ${result.items.length} cashiers`);
 
     return res.json({
       success: true,
       message: "Cashiers retrieved successfully",
-      data: cashiers,
+      data: result,
     });
   } catch (err) {
     next(err);
@@ -43,8 +46,10 @@ export const getAllCashiersController = async (req: Request, res: Response, next
 // GET Cashier by ID (belongs to admin)
 export const getCashierByIdController = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    logger.info(`Fetching cashier with ID: ${req.params.id}`);
     const id = Number(req.params.id);
     const cashier = await getCashierByIdService(id);
+    logger.info(`Cashier with ID: ${id} retrieved successfully`);
 
     return res.json({
       success: true,

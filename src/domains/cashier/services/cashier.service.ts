@@ -6,9 +6,11 @@ import {
   updateCashier,
   softDeleteCashier,
   getAllCashiers,
+  countCashiers,
 } from "../repositories/cashier.repository";
 import { notFound } from "../../../core/errors/http-error";
 import { getPagination } from "../../../core/utils/pagination.util";
+import { User } from "@prisma/client";
 
 // CREATE cashier
 export const createCashierService = async (dto: CreateCashierDTO) => {
@@ -23,8 +25,29 @@ export const createCashierService = async (dto: CreateCashierDTO) => {
 
 // GET all cashiers for the admin (with pagination)
 export const getAllCashiersService = async (query: any) => {
-  const { skip, limit } = getPagination(query, 10, 50); // default 10, max 50
-  return await getAllCashiers({ skip, take: limit });
+  const { skip, limit, page } = getPagination(query, 10, 50);
+  const search = query.search?.toString() || undefined;
+  const sortBy = query.sortBy?.toString() as keyof User | undefined;
+  const sortOrder = query.sortOrder === "asc" ? "asc" : "desc";
+
+  // Hitung total items
+  const totalItems = await countCashiers(search);
+
+  // Ambil data dengan pagination
+  const cashiers = await getAllCashiers({ skip, take: limit, search, sortBy, sortOrder });
+
+  // Hitung total halaman
+  const totalPages = Math.ceil(totalItems / limit);
+
+  return {
+    items: cashiers,
+    meta: {
+      totalItems,
+      totalPages,
+      currentPage: page,
+      limit,
+    },
+  };
 };
 
 // GET cashier by ID

@@ -17,13 +17,50 @@ export const createCashier = async (data: CreateCashierDTO): Promise<User> => {
 
 // Get all cashiers
 
-export const getAllCashiers = async (options?: { skip?: number; take?: number }): Promise<User[]> => {
-    return await prisma.user.findMany({
-        where: { role: 'CASHIER', isDeleted: false },
-        orderBy: { createdAt: 'desc' },
-        skip: options?.skip,
-        take: options?.take,
-    });
+export const getAllCashiers = async (options?: {
+  skip?: number;
+  take?: number;
+  search?: string;
+  sortBy?: keyof User;
+  sortOrder?: "asc" | "desc";
+}): Promise<User[]> => {
+  const where: any = {
+    role: 'CASHIER',
+    isDeleted: false,
+  };
+
+  if (options?.search) {
+    where.OR = [
+      { username: { contains: options.search, mode: 'insensitive' } },
+      { fullName: { contains: options.search, mode: 'insensitive' } },
+    ];
+  }
+
+  return await prisma.user.findMany({
+    where,
+    orderBy: {
+      [options?.sortBy || 'createdAt']: options?.sortOrder || 'desc',
+    },
+    skip: options?.skip,
+    take: options?.take,
+  });
+};
+
+// Count total cashiers (for pagination)
+export const countCashiers = async (search?: string): Promise<number> => {
+  const where: any = {
+    role: "CASHIER",
+    isDeleted: false,
+  };
+
+  if (search) {
+    where.OR = [
+      { username: { contains: search, mode: "insensitive" } },
+      { fullName: { contains: search, mode: "insensitive" } },
+    ];
+  }
+
+  return prisma.user.count({ where });
 };
 
 // Find a cashier by ID
