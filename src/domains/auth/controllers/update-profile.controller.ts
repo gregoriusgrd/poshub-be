@@ -2,12 +2,20 @@ import { Request, Response, NextFunction } from "express";
 import { updateProfileService } from "../services/update-profile.service";
 import { updateProfileSchema } from "../validations/auth.validations";
 
-export const updateProfileController = async (req: Request, res: Response, next: NextFunction) => {
+export const updateProfileController = async ( req: Request, res: Response, next: NextFunction) => {
   try {
-    const userId = req.user!.userId; // requireAuth middleware
-    const { fullName, profilePicture, password } = updateProfileSchema.parse(req.body);
+    const userId = req.user!.userId; // dari requireAuth middleware
 
-    const updatedUser = await updateProfileService({ userId, fullName, profilePicture, password });
+    const { fullName } = updateProfileSchema.parse(req.body);
+
+    // file dari multer
+    const file = req.file;
+
+    const updatedUser = await updateProfileService({
+      userId,
+      fullName,
+      file,
+    });
 
     return res.json({
       success: true,
@@ -15,6 +23,6 @@ export const updateProfileController = async (req: Request, res: Response, next:
       data: updatedUser,
     });
   } catch (err) {
-    return next(err);
+    next(err);
   }
 };

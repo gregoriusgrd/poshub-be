@@ -5,6 +5,7 @@ import { logoutController } from "../controllers/logout.controller";
 import { changePasswordController } from "../controllers/change-password.controller";
 import { updateProfileController } from "../controllers/update-profile.controller";
 import { getProfileController } from "../controllers/get-profile.controller";
+import { uploaderRules } from "../../../core/utils/uploader.util";
 
 const router = Router();
 
@@ -23,7 +24,7 @@ router.post("/logout", logoutController);
 router.patch("/change-password", changePasswordController);
 
 // PATCH /api/auth/update-profile
-router.patch("/update-profile", updateProfileController);
+router.patch("/update-profile", uploaderRules.profileImage.single("profilePicture"), updateProfileController);
 
 router.get("/me", getProfileController);
 

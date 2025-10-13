@@ -3,6 +3,7 @@ import { invalidCredentialsError } from "../errors/auth.errors";
 import { findUserByUsername } from "../../user/repositories/user.repository";
 import bcrypt from "bcrypt";
 import { signJwtToken } from "../../../core/utils/jwt.util";
+import { profile } from "console";
 
 interface LoginInput {
   username: string;
@@ -25,6 +26,7 @@ export const loginService = async ({ username, password }: LoginInput) => {
       username: user.username,
       fullName: user.fullName,
       role: user.role,
+      profilePicture: user.profilePicture,
     },
     token,
   };

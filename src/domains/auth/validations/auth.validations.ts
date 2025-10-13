@@ -30,10 +30,7 @@ export const changePasswordSchema = z.object({
 
 export const updateProfileSchema = z.object({
     fullName: z.string().min(1).max(50).optional(),
-    password: passwordSchema.optional(),
-    profilePicture: z.string().url().optional(),
 })
-.strict();
 
 // ini sementara saja, nanti dipindah
 

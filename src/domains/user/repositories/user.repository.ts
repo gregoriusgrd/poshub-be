@@ -25,10 +25,10 @@ export const updateUserPassword = async (userId: number, newPassword: string) =>
   });
 };
 
-// Update user profile (fullName, profilePicture, optional password)
+// Update profile (fullName, profilePicture)
 export const updateUserProfile = async (
   userId: number,
-  data: Partial<{ fullName: string; profilePicture: string; password: string }>
+  data: Partial<{ fullName: string; profilePicture: string }>
 ) => {
   return prisma.user.update({
     where: { id: userId },
