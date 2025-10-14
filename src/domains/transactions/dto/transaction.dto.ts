@@ -9,4 +9,7 @@ export interface CreateTransactionDTO {
     items: TransactionItemDTO[];
     paymentAmount: number;
     paymentMethod: "CASH" | "DEBIT_CARD";
+    cardNumber?: string;
+    cardExpiry?: string;
+    cardCvv?: string;
 }

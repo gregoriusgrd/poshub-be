@@ -4,6 +4,8 @@ import { getTransactionHistoryService } from "../services/get-transaction-histor
 export const getTransactionHistoryController = async (req: Request, res: Response, next: NextFunction) => {
     try {
         const cashierId = req.user!.userId;
+        const role = req.user!.role;
+
         const { page, limit, search } = req.query;
 
         const history = await getTransactionHistoryService({
@@ -11,6 +13,7 @@ export const getTransactionHistoryController = async (req: Request, res: Respons
             limit: Number(limit),
             search: String(search || ""),
             cashierId,
+            role,
         })
 
         return res.status(200).json({

@@ -10,6 +10,7 @@ interface GetTransactionHistoryParams {
     endDate?: string;
     paymentMethod?: 'CASH' | 'DEBIT_CARD';
     search?: string;
+    role: 'ADMIN' | 'CASHIER';
 }
 
 export const getTransactionHistoryService = async (params: GetTransactionHistoryParams) => {
@@ -17,6 +18,7 @@ export const getTransactionHistoryService = async (params: GetTransactionHistory
         page = 1,
         limit = 10,
         cashierId,
+        role,
         shiftId,
         startDate,
         endDate,
@@ -28,62 +30,74 @@ export const getTransactionHistoryService = async (params: GetTransactionHistory
 
     const where: any = {};
 
-    // Filter by cashierId, shiftId, paymentMethod, date range
-    if (cashierId) where.cashierId = cashierId;
+    // 1. Jika role CASHIER, batasi hanya transaksi miliknya & di shift aktif atau hari ini
+    if (role === "CASHIER") {
+
+        // hanya bisa lihat transaksi miliknya
+        where.cashierId = cashierId;
+
+        // cari shift aktif kasir ini
+        const activeShift = await prisma.shift.findFirst({
+            where: { cashierId, status: "OPEN" },
+            select: { id: true, openedAt: true },
+        });
+
+        if (activeShift) {
+            // filter transaksi yang terjadi setelah shift dibuka
+            where.shiftId = activeShift.id;
+        } else {
+            // kalau tidak ada shift aktif, tampilkan transaksi hari ini
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const tomorrow = new Date(today);
+            tomorrow.setDate(today.getDate() + 1);
+            where.transactionTime = { gte: today, lt: tomorrow };
+        }
+    }
+
+    // 2. Filter opsional lainnya
+    if (role === "ADMIN" && cashierId) where.cashierId = cashierId;
     if (shiftId) where.shiftId = shiftId;
     if (paymentMethod) where.paymentMethod = paymentMethod;
+
     if (startDate || endDate) {
         where.transactionTime = {};
         if (startDate) where.transactionTime.gte = new Date(startDate);
         if (endDate) where.transactionTime.lte = new Date(endDate);
     }
 
-    // Search by cashier name or product name
+    // Search by transactionCode, cashier name, product name
     if (search) {
         where.OR = [
-        {
-            cashier: {
-            fullName: {
-                contains: search,
-                mode: "insensitive",
+            { transactionCode: { contains: search, mode: "insensitive" } },
+            {
+                cashier: { fullName: { contains: search, mode: "insensitive" } },
             },
-            },
-        },
-        {
-            transactionItems: {
-            some: {
-                product: {
-                name: {
-                    contains: search,
-                    mode: "insensitive",
-                },
+            {
+                transactionItems: {
+                    some: {
+                        product: { name: { contains: search, mode: "insensitive" } },
+                    },
                 },
             },
-            },
-        },
         ];
     }
 
-    // ambil data & total count secara bersamaan
+    // 4. query data dan count total
     const [data, total] = await Promise.all([
         prisma.transaction.findMany({
-        where,
-        skip,
-        take,
-        orderBy: { transactionTime: "desc" },
-        include: {
-            cashier: { select: { id: true, fullName: true } },
-            transactionItems: {
+            where,
+            skip,
+            take,
+            orderBy: { transactionTime: "desc" },
             include: {
-                product: { select: { id: true, name: true, price: true } },
+                cashier: { select: { id: true, fullName: true } },
             },
-            },
-        },
         }),
         prisma.transaction.count({ where }),
     ]);
 
-    // return pagination result
+    // 5. return dengan pagination meta
     return {
         data,
         meta: {

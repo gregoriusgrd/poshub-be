@@ -124,6 +124,7 @@ model Transaction {
   @@index([transactionTime]) // filter by date range
   @@index([paymentMethod]) // filter by payment method
   @@index([cashierId, transactionTime]) // filter by cashier and date range
+  @@index([transactionCode]) // search by transaction code
 }
 
 model TransactionItem {

@@ -8,16 +8,18 @@ export const createTransaction = (
     totalAmount: number, 
     paymentAmount: number,
     changeAmount: number,
-    paymentMethod: "CASH" | "DEBIT_CARD"
+    paymentMethod: "CASH" | "DEBIT_CARD",
+    transactionCode: string
 ) => {
     return prisma.transaction.create({
         data: {
+            transactionCode,
             shiftId,
             cashierId,
             totalAmount,
             paymentAmount,
             changeAmount,
-            paymentMethod
+            paymentMethod,
         }
     });
 };

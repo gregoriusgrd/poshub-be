@@ -7,7 +7,12 @@ export const getTransactionDetailController = async (req: Request, res: Response
         const { transactionId } = req.params;
         if (!transactionId) throw badRequest("Transaction ID is required");
 
-        const detail = await getTransactionDetailService(Number(transactionId));
+        const user = {
+            id: req.user!.userId,
+            role: req.user!.role,
+        }
+
+        const detail = await getTransactionDetailService(Number(transactionId), user);
 
         return res.status(200).json({
             success: true,
