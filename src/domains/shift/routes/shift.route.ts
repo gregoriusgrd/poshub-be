@@ -5,6 +5,7 @@ import { Role } from "@prisma/client";
 import { startShiftController } from "../controllers/start-shift.controller";
 import { endShiftController } from "../controllers/end-shift.controller";
 import { getShiftSummaryController } from "../controllers/get-shift-summary.controller";
+import { getActiveShiftController } from "../controllers/get-active-shift.controller";
 
 const router = Router();
 
@@ -13,5 +14,6 @@ router.use(requireAuth);
 router.post("/start", requireRole([Role.CASHIER]), startShiftController);
 router.post("/close", requireRole([Role.CASHIER]), endShiftController);
 router.get("/:shiftId/summary", requireRole([Role.CASHIER, Role.ADMIN]), getShiftSummaryController);
+router.get("/active", requireRole([Role.CASHIER]), getActiveShiftController);
 
 export default router;

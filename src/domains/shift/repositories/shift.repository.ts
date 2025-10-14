@@ -12,9 +12,12 @@ export interface CloseShiftPayload {
 }
 
 export const findActiveShiftByCashier = (cashierId: number) => {
-    return prisma.shift.findFirst({
-        where: { cashierId, status: "OPEN" },
-    });
+  return prisma.shift.findFirst({
+    where: { cashierId, status: "OPEN" },
+    include: {
+      cashier: { select: { id: true, fullName: true } },
+    },
+  });
 };
 
 // Mulai shift (openingBalance di pass dari service)

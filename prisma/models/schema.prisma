@@ -72,8 +72,8 @@ model Product {
   updatedAt DateTime @updatedAt
 
   // Relations
-  categoryId Int
-  category   Category @relation(fields: [categoryId], references: [id])
+  categoryId       Int
+  category         Category          @relation(fields: [categoryId], references: [id])
   transactionItems TransactionItem[]
 
   @@index([price]) // filter by price range
@@ -103,12 +103,13 @@ enum PaymentMethod {
 
 model Transaction {
   id              Int           @id @default(autoincrement())
+  transactionCode String        @unique // baru 
   cashierId       Int
   shiftId         Int
   totalAmount     Decimal       @db.Decimal(12, 2)
   transactionTime DateTime      @default(now())
-  paymentAmount   Decimal?       @db.Decimal(12, 2) // uang yg dibayar
-  changeAmount    Decimal?       @db.Decimal(12, 2) // kembalian
+  paymentAmount   Decimal?      @db.Decimal(12, 2) // uang yg dibayar
+  changeAmount    Decimal?      @db.Decimal(12, 2) // kembalian
   paymentMethod   PaymentMethod
 
   createdAt DateTime @default(now())

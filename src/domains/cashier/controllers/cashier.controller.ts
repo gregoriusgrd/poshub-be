@@ -64,9 +64,13 @@ export const getCashierByIdController = async (req: Request, res: Response, next
 // UPDATE Cashier (belongs to admin)
 export const updateCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    logger.info(`Updating cashier with ID: ${req.params.id}`);
     const id = Number(req.params.id);
+    logger.info("Update data:", req.body);
     const dto: UpdateCashierDTO = updateCashierSchema.parse(req.body);
     const updatedCashier = await updateCashierService(id, dto);
+
+    logger.info(`Cashier with ID: ${id} updated successfully`);
     
     return res.json({
       success: true,
