@@ -26,6 +26,10 @@ export const createTransactionSchema = z.object({
   items: z.array(transactionItemSchema).nonempty("At least one item required"),
   paymentAmount: toPositiveNumber,
   paymentMethod: z.enum(["CASH", "DEBIT_CARD"]),
-});
+  cardNumber: z.string().optional(),
+  cardExpiry: z.string().optional(),
+  cardCvv: z.string().optional(),
+})
+.passthrough();
 
 export type CreateTransactionInput = z.infer<typeof createTransactionSchema>;

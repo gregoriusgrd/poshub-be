@@ -11,9 +11,11 @@ const router = Router();
 
 router.use(requireAuth);
 
+router.get("/active", requireRole([Role.CASHIER]), getActiveShiftController);
+
 router.post("/start", requireRole([Role.CASHIER]), startShiftController);
 router.post("/close", requireRole([Role.CASHIER]), endShiftController);
+
 router.get("/:shiftId/summary", requireRole([Role.CASHIER, Role.ADMIN]), getShiftSummaryController);
-router.get("/active", requireRole([Role.CASHIER]), getActiveShiftController);
 
 export default router;
