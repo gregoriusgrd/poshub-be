@@ -1,0 +1,17 @@
+"use strict";
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = require("express");
+const auth_middleware_1 = require("../../../core/middlewares/auth.middleware");
+const role_middleware_1 = require("../../../core/middlewares/role.middleware");
+const client_1 = require("@prisma/client");
+const start_shift_controller_1 = require("../controllers/start-shift.controller");
+const end_shift_controller_1 = require("../controllers/end-shift.controller");
+const get_shift_summary_controller_1 = require("../controllers/get-shift-summary.controller");
+const get_active_shift_controller_1 = require("../controllers/get-active-shift.controller");
+const router = (0, express_1.Router)();
+router.use(auth_middleware_1.requireAuth);
+router.get("/active", (0, role_middleware_1.requireRole)([client_1.Role.CASHIER]), get_active_shift_controller_1.getActiveShiftController);
+router.post("/start", (0, role_middleware_1.requireRole)([client_1.Role.CASHIER]), start_shift_controller_1.startShiftController);
+router.post("/close", (0, role_middleware_1.requireRole)([client_1.Role.CASHIER]), end_shift_controller_1.endShiftController);
+router.get("/:shiftId/summary", (0, role_middleware_1.requireRole)([client_1.Role.CASHIER, client_1.Role.ADMIN]), get_shift_summary_controller_1.getShiftSummaryController);
+exports.default = router;
