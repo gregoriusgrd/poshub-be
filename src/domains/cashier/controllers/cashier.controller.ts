@@ -26,7 +26,7 @@ export const createCashierController = async (req: Request, res: Response, next:
   }
 };
 
-// GET all Cashiers for the admin
+// GET all Cashiers
 export const getAllCashiersController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     logger.info("Fetching all cashiers with query params", req.query);
@@ -43,7 +43,7 @@ export const getAllCashiersController = async (req: Request, res: Response, next
   }
 };
 
-// GET Cashier by ID (belongs to admin)
+// GET Cashier by ID
 export const getCashierByIdController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     logger.info(`Fetching cashier with ID: ${req.params.id}`);
@@ -61,12 +61,10 @@ export const getCashierByIdController = async (req: Request, res: Response, next
   }
 };
 
-// UPDATE Cashier (belongs to admin)
+// UPDATE Cashier
 export const updateCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    logger.info(`Updating cashier with ID: ${req.params.id}`);
     const id = Number(req.params.id);
-    logger.info("Update data:", req.body);
     const dto: UpdateCashierDTO = updateCashierSchema.parse(req.body);
     const updatedCashier = await updateCashierService(id, dto);
 
@@ -82,7 +80,7 @@ export const updateCashierController = async (req: Request, res: Response, next:
   }
 };
 
-// SOFT DELETE Cashier (belongs to admin)
+// SOFT DELETE Cashier
 export const deleteCashierController = async (req: Request, res: Response, next: NextFunction) => {
   try {
     const id = Number(req.params.id);
