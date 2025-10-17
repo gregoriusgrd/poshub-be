@@ -6,6 +6,7 @@ import categoryRoutes from "../domains/category/routes/category.route";
 import shiftRoutes from "../domains/shift/routes/shift.route";
 import transactionRoutes from "../domains/transactions/routes/transaction.route";
 import reportRoutes from "../domains/reports/routes/report.route";
+import dashboardRoutes from "../domains/dashboard/routes/dashboard.route";
 
 const router = Router();
 
@@ -34,5 +35,8 @@ router.use("/transactions", transactionRoutes);
 
 // Report routes
 router.use("/reports", reportRoutes);
+
+// Dashboard routes
+router.use("/dashboard", dashboardRoutes);
 
 export default router;
