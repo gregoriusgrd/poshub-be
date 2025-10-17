@@ -26,18 +26,28 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   }
 
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    if (err.code === "P2002") {
-      return res.status(409).json({
+      if (err.code === "P2002") {
+        return res.status(409).json({
+          success: false,
+          message: "Unique constraint violation",
+          code: "UNIQUE_CONSTRAINT",
+        });
+      }
+      if (err.code === "P2025") {
+        return res.status(404).json({
+          success: false,
+          message: "Record not found",
+          code: "RECORD_NOT_FOUND",
+        });
+      }
+      if (err.code === "P2003") {
+      // Foreign key constraint violated
+      return res.status(400).json({
         success: false,
-        message: "Unique constraint violation",
-        code: "UNIQUE_CONSTRAINT",
-      });
-    }
-    if (err.code === "P2025") {
-      return res.status(404).json({
-        success: false,
-        message: "Record not found",
-        code: "RECORD_NOT_FOUND",
+        message:
+          "Cannot delete this record because it is still referenced by another resource",
+        code: "FOREIGN_KEY_CONSTRAINT",
+        meta: err.meta, // optional, for debugging
       });
     }
   }

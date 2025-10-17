@@ -11,6 +11,9 @@ import {
 import { notFound } from "../../../core/errors/http-error";
 import { getPagination } from "../../../core/utils/pagination.util";
 import { User } from "@prisma/client";
+import prisma from "../../../config/prisma";
+import { badRequest, internalError } from "../../../core/errors/http-error";
+import { EC } from "../../../core/errors/error-codes";
 
 // CREATE cashier
 export const createCashierService = async (dto: CreateCashierDTO) => {
@@ -71,10 +74,37 @@ export const updateCashierService = async (id: number, dto: UpdateCashierDTO) =>
   return await updateCashier(id, updateData);
 };
 
-// SOFT DELETE cashier by ID
+/**
+ * Soft delete cashier
+ * Tidak boleh dihapus jika masih terlibat di transaksi (record historical data)
+ * Tidak boleh dihapus dua kali
+ */
 export const deleteCashierService = async (id: number) => {
+  // Cari cashier
   const cashier = await findCashierById(id);
-  if (!cashier || cashier.isDeleted) throw notFound;
+  if (!cashier || cashier.isDeleted) {
+    throw notFound("Cashier not found", EC.NOT_FOUND);
+  }
 
-  return await softDeleteCashier(id);
+  try {
+    // Cek apakah cashier masih punya transaksi
+    const hasTransactions = await prisma.transaction.findFirst({
+      where: { cashierId: id },
+    });
+
+    if (hasTransactions) {
+      throw badRequest(
+        "Cannot delete this cashier because they are associated with existing transactions.",
+        EC.CASHIER_HAS_TRANSACTIONS
+      );
+    }
+
+    // Soft delete cashier
+    await softDeleteCashier(id);
+
+    return { message: "Cashier soft deleted successfully" };
+  } catch (err) {
+    // fallback — tangani error Prisma atau runtime
+    throw internalError("Failed to delete cashier", EC.INTERNAL_SERVER_ERROR, err);
+  }
 };
