@@ -1,5 +1,5 @@
-import prisma from "../../../config/prisma";
-import { getPagination } from "../../../core/utils/pagination.util";
+import prisma from "../../../../config/prisma";
+import { getPagination } from "../../../../core/utils/pagination.util";
 import { startOfDay, endOfDay } from "date-fns";
 
 /**
