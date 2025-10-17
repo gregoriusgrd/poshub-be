@@ -1,5 +1,5 @@
-import prisma from "../../../config/prisma";
-import { getPagination } from "../../../core/utils/pagination.util";
+import prisma from "../../../../config/prisma";
+import { getPagination } from "../../../../core/utils/pagination.util";
 
 /**
  * Menampilkan ringkasan shift kasir dalam periode tertentu
