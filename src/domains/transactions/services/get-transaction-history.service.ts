@@ -8,9 +8,11 @@ interface GetTransactionHistoryParams {
     shiftId?: number;
     startDate?: string;
     endDate?: string;
-    paymentMethod?: 'CASH' | 'DEBIT_CARD';
+    paymentMethod?: "CASH" | "DEBIT_CARD";
     search?: string;
-    role: 'ADMIN' | 'CASHIER';
+    role: "ADMIN" | "CASHIER";
+    sortBy?: "createdAt";
+    sortOrder?: "asc" | "desc";
 }
 
 export const getTransactionHistoryService = async (params: GetTransactionHistoryParams) => {
@@ -24,10 +26,11 @@ export const getTransactionHistoryService = async (params: GetTransactionHistory
         endDate,
         paymentMethod,
         search = "",
+        sortBy = "createdAt",
+        sortOrder = "desc",
     } = params;
 
     const { skip, take, page: currentPage, limit: perPage } = getPagination({ page, limit });
-
     const where: any = {};
 
     // 1. Jika role CASHIER, batasi hanya transaksi miliknya & di shift aktif atau hari ini
@@ -39,7 +42,7 @@ export const getTransactionHistoryService = async (params: GetTransactionHistory
         // cari shift aktif kasir ini
         const activeShift = await prisma.shift.findFirst({
             where: { cashierId, status: "OPEN" },
-            select: { id: true, openedAt: true },
+            select: { id: true },
         });
 
         if (activeShift) {
@@ -51,7 +54,7 @@ export const getTransactionHistoryService = async (params: GetTransactionHistory
             today.setHours(0, 0, 0, 0);
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
-            where.transactionTime = { gte: today, lt: tomorrow };
+            where.createdAt = { gte: today, lt: tomorrow };
         }
     }
 
@@ -61,23 +64,19 @@ export const getTransactionHistoryService = async (params: GetTransactionHistory
     if (paymentMethod) where.paymentMethod = paymentMethod;
 
     if (startDate || endDate) {
-        where.transactionTime = {};
-        if (startDate) where.transactionTime.gte = new Date(startDate);
-        if (endDate) where.transactionTime.lte = new Date(endDate);
+        where.createdAt = {};
+        if (startDate) where.createdAt.gte = new Date(startDate);
+        if (endDate) where.createdAt.lte = new Date(endDate);
     }
 
     // Search by transactionCode, cashier name, product name
     if (search) {
         where.OR = [
             { transactionCode: { contains: search, mode: "insensitive" } },
-            {
-                cashier: { fullName: { contains: search, mode: "insensitive" } },
-            },
+            { cashier: { fullName: { contains: search, mode: "insensitive" } } },
             {
                 transactionItems: {
-                    some: {
-                        product: { name: { contains: search, mode: "insensitive" } },
-                    },
+                some: { product: { name: { contains: search, mode: "insensitive" } } },
                 },
             },
         ];
@@ -89,7 +88,7 @@ export const getTransactionHistoryService = async (params: GetTransactionHistory
             where,
             skip,
             take,
-            orderBy: { transactionTime: "desc" },
+            orderBy: { [sortBy]: sortOrder },
             include: {
                 cashier: { select: { id: true, fullName: true } },
             },
@@ -105,6 +104,6 @@ export const getTransactionHistoryService = async (params: GetTransactionHistory
             page: currentPage,
             limit: perPage,
             totalPages: Math.ceil(total / perPage),
-        }
-    }
+        },
+    };
 }
