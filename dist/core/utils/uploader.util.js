@@ -6,7 +6,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.uploaderRules = void 0;
 const multer_1 = __importDefault(require("multer"));
 // MIME type yang diperbolehkan
-const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/avif"];
 // Helper untuk konfigurasi multer dengan memory storage
 const memoryUploader = (options) => {
     return (0, multer_1.default)({

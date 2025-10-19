@@ -1,7 +1,7 @@
 import multer from "multer";
 
 // MIME type yang diperbolehkan
-const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp"];
+const allowedImageTypes = ["image/jpeg", "image/png", "image/jpg", "image/webp", "image/avif"];
 
 // Helper untuk konfigurasi multer dengan memory storage
 const memoryUploader = (options: { allowedTypes: string[]; maxSizeMB: number }) => {

@@ -6,7 +6,15 @@ import { getPagination } from "../../../../core/utils/pagination.util";
  */
 
 export const getShiftSalesService = async (query: any) => {
-  const { start, end, cashierId, status, sortBy = "openedAt", order = "desc" } = query;
+    const {
+    start,
+    end,
+    cashierId,
+    status,
+    search,
+    sortBy = "openedAt",
+    order = "desc",
+  } = query;
 
   // Date filter
   const dateFilter: any = {};
@@ -22,10 +30,25 @@ export const getShiftSalesService = async (query: any) => {
     limit: Number(query.limit),
   });
 
-  // Where clause
-  const whereClause: any = { ...dateFilter };
-  if (cashierId) whereClause.cashierId = Number(cashierId);
-  if (status) whereClause.status = status;
+  /**
+   * Build where clause
+   * filter berdasarkan tanggal, status, cashierId, dan nama kasir (search)
+   */
+  const whereClause: any = {
+    ...dateFilter,
+    ...(status ? { status } : {}),
+    ...(cashierId ? { cashierId: Number(cashierId) } : {}),
+    ...(search
+      ? {
+          cashier: {
+            OR: [
+              { fullName: { contains: search, mode: "insensitive" } },
+              { username: { contains: search, mode: "insensitive" } },
+            ],
+          },
+        }
+      : {}),
+  };
 
   // Query shifts
   const [shifts, total] = await Promise.all([
@@ -44,7 +67,7 @@ export const getShiftSalesService = async (query: any) => {
   // Mapping hasil akhir
   const report = shifts.map((s) => ({
     id: s.id,
-    cashier: s.cashier.fullName,
+    cashier: s.cashier.fullName || s.cashier.username,
     cashierId: s.cashierId,
     openedAt: s.openedAt,
     closedAt: s.closedAt,

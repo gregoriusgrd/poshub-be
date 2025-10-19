@@ -1,6 +1,7 @@
 import type { ErrorRequestHandler, RequestHandler } from "express";
 import { ZodError } from "zod";
 import { Prisma } from "@prisma/client";
+import multer from "multer";
 import { isHttpError } from "../errors/http-error";
 
 // Middleware untuk route yang tidak ditemukan
@@ -16,6 +17,7 @@ export const notFoundHandler: RequestHandler = (_req, res) => {
 export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
   console.error(`[${req.method} ${req.url}]`, err);
 
+  // Zod validation errors
   if (err instanceof ZodError) {
     return res.status(400).json({
       success: false,
@@ -25,15 +27,13 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     });
   }
 
+  // Prisma known errors
   if (err instanceof Prisma.PrismaClientKnownRequestError) {
-    // Unique constraint violation
     if (err.code === "P2002") {
-      // ambil nama field dari metadata (biasanya: ['username'])
       const target = Array.isArray(err.meta?.target)
         ? (err.meta?.target as string[]).join(", ")
         : "field";
 
-      // Buat pesan yang lebih jelas
       const message =
         target === "username"
           ? "Username already exists."
@@ -46,7 +46,6 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
       });
     }
 
-    // Record not found
     if (err.code === "P2025") {
       return res.status(404).json({
         success: false,
@@ -55,7 +54,6 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
       });
     }
 
-    // Foreign key constraint
     if (err.code === "P2003") {
       return res.status(400).json({
         success: false,
@@ -67,7 +65,34 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     }
   }
 
+  // Multer error: File too large
+  if (err instanceof multer.MulterError) {
+    if (err.code === "LIMIT_FILE_SIZE") {
+      return res.status(400).json({
+        success: false,
+        message: "File too large. Maximum allowed size is 1MB.",
+        code: "LIMIT_FILE_SIZE",
+      });
+    }
 
+    // other Multer errors (like fieldname mismatch)
+    return res.status(400).json({
+      success: false,
+      message: `Upload error: ${err.message}`,
+      code: "UPLOAD_ERROR",
+    });
+  }
+
+  // Custom fileFilter error from uploader.util
+  if (err.message?.includes("Invalid file type")) {
+    return res.status(400).json({
+      success: false,
+      message: "Invalid file type. Only images are allowed.",
+      code: "INVALID_FILE_TYPE",
+    });
+  }
+
+  // Custom HTTP error
   if (isHttpError(err)) {
     return res.status(err.statusCode).json({
       success: false,
@@ -77,6 +102,7 @@ export const errorHandler: ErrorRequestHandler = (err, req, res, _next) => {
     });
   }
 
+  // Default (catch all)
   return res.status(500).json({
     success: false,
     message: "Internal server error",
