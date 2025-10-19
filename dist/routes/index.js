@@ -11,6 +11,7 @@ const category_route_1 = __importDefault(require("../domains/category/routes/cat
 const shift_route_1 = __importDefault(require("../domains/shift/routes/shift.route"));
 const transaction_route_1 = __importDefault(require("../domains/transactions/routes/transaction.route"));
 const report_route_1 = __importDefault(require("../domains/reports/routes/report.route"));
+const dashboard_route_1 = __importDefault(require("../domains/dashboard/routes/dashboard.route"));
 const router = (0, express_1.Router)();
 // Example route
 router.get("/", (req, res) => {
@@ -30,4 +31,6 @@ router.use("/shifts", shift_route_1.default);
 router.use("/transactions", transaction_route_1.default);
 // Report routes
 router.use("/reports", report_route_1.default);
+// Dashboard routes
+router.use("/dashboard", dashboard_route_1.default);
 exports.default = router;
