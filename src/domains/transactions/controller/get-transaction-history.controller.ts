@@ -8,7 +8,14 @@ export const getTransactionHistoryController = async (req: Request, res: Respons
         const cashierId = req.user!.userId;
         const role = req.user!.role;
 
-        const { page, limit, search } = req.query;
+        const {
+            page,
+            limit,
+            search,
+            paymentMethod,
+            sortBy,
+            sortOrder,
+        } = req.query;
 
         const history = await getTransactionHistoryService({
             page: Number(page),
@@ -16,7 +23,11 @@ export const getTransactionHistoryController = async (req: Request, res: Respons
             search: String(search || ""),
             cashierId,
             role,
-        })
+            paymentMethod: paymentMethod as "CASH" | "DEBIT_CARD" | undefined,
+            sortBy: sortBy as "createdAt" | undefined,
+            sortOrder: sortOrder as "asc" | "desc" | undefined,
+        });
+        
         logger.info(`Transaction history retrieved successfully: ${JSON.stringify(history)}`);
 
         return res.status(200).json({

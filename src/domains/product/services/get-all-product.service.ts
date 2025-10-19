@@ -3,18 +3,19 @@ import { getPagination } from "../../../core/utils/pagination.util";
 import { Prisma } from "@prisma/client";
 
 // GET ALL PRODUCTS (with pagination, search, filter, sort)
+
 export const getAllProductsService = async (query: {
   page?: number;
   limit?: number;
   search?: string;
   categoryId?: number;
-  sortBy?: "name" | "price" | "createdAt";
+  sortBy?: "price" | "createdAt";
   order?: "asc" | "desc";
 }) => {
   const { skip, take, page, limit } = getPagination(query);
   const { search, categoryId, sortBy = "createdAt", order = "desc" } = query;
 
-  // 🧠 Build filter "where"
+  // Build filter "where"
   const where: Prisma.ProductWhereInput = {
     isDeleted: false,
     ...(search
@@ -28,7 +29,7 @@ export const getAllProductsService = async (query: {
     ...(categoryId ? { categoryId } : {}),
   };
 
-  // 🧾 Fetch products + count in parallel
+  // Fetch products + count in parallel
   const [data, total] = await Promise.all([
     prisma.product.findMany({
       where,
@@ -40,7 +41,7 @@ export const getAllProductsService = async (query: {
     prisma.product.count({ where }),
   ]);
 
-  // 🎯 Return result with pagination metadata
+  // Return result with pagination metadata
   return {
     data,
     meta: {
