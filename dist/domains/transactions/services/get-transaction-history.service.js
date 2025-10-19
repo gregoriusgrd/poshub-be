@@ -16,7 +16,7 @@ exports.getTransactionHistoryService = void 0;
 const prisma_1 = __importDefault(require("../../../config/prisma"));
 const pagination_util_1 = require("../../../core/utils/pagination.util");
 const getTransactionHistoryService = (params) => __awaiter(void 0, void 0, void 0, function* () {
-    const { page = 1, limit = 10, cashierId, role, shiftId, startDate, endDate, paymentMethod, search = "", } = params;
+    const { page = 1, limit = 10, cashierId, role, shiftId, startDate, endDate, paymentMethod, search = "", sortBy = "createdAt", sortOrder = "desc", } = params;
     const { skip, take, page: currentPage, limit: perPage } = (0, pagination_util_1.getPagination)({ page, limit });
     const where = {};
     // 1. Jika role CASHIER, batasi hanya transaksi miliknya & di shift aktif atau hari ini
@@ -26,7 +26,7 @@ const getTransactionHistoryService = (params) => __awaiter(void 0, void 0, void 
         // cari shift aktif kasir ini
         const activeShift = yield prisma_1.default.shift.findFirst({
             where: { cashierId, status: "OPEN" },
-            select: { id: true, openedAt: true },
+            select: { id: true },
         });
         if (activeShift) {
             // filter transaksi yang terjadi setelah shift dibuka
@@ -38,7 +38,7 @@ const getTransactionHistoryService = (params) => __awaiter(void 0, void 0, void 
             today.setHours(0, 0, 0, 0);
             const tomorrow = new Date(today);
             tomorrow.setDate(today.getDate() + 1);
-            where.transactionTime = { gte: today, lt: tomorrow };
+            where.createdAt = { gte: today, lt: tomorrow };
         }
     }
     // 2. Filter opsional lainnya
@@ -49,24 +49,20 @@ const getTransactionHistoryService = (params) => __awaiter(void 0, void 0, void 
     if (paymentMethod)
         where.paymentMethod = paymentMethod;
     if (startDate || endDate) {
-        where.transactionTime = {};
+        where.createdAt = {};
         if (startDate)
-            where.transactionTime.gte = new Date(startDate);
+            where.createdAt.gte = new Date(startDate);
         if (endDate)
-            where.transactionTime.lte = new Date(endDate);
+            where.createdAt.lte = new Date(endDate);
     }
     // Search by transactionCode, cashier name, product name
     if (search) {
         where.OR = [
             { transactionCode: { contains: search, mode: "insensitive" } },
-            {
-                cashier: { fullName: { contains: search, mode: "insensitive" } },
-            },
+            { cashier: { fullName: { contains: search, mode: "insensitive" } } },
             {
                 transactionItems: {
-                    some: {
-                        product: { name: { contains: search, mode: "insensitive" } },
-                    },
+                    some: { product: { name: { contains: search, mode: "insensitive" } } },
                 },
             },
         ];
@@ -77,7 +73,7 @@ const getTransactionHistoryService = (params) => __awaiter(void 0, void 0, void 
             where,
             skip,
             take,
-            orderBy: { transactionTime: "desc" },
+            orderBy: { [sortBy]: sortOrder },
             include: {
                 cashier: { select: { id: true, fullName: true } },
             },
@@ -92,7 +88,7 @@ const getTransactionHistoryService = (params) => __awaiter(void 0, void 0, void 
             page: currentPage,
             limit: perPage,
             totalPages: Math.ceil(total / perPage),
-        }
+        },
     };
 });
 exports.getTransactionHistoryService = getTransactionHistoryService;

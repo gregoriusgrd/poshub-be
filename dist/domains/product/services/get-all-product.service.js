@@ -20,7 +20,7 @@ const client_1 = require("@prisma/client");
 const getAllProductsService = (query) => __awaiter(void 0, void 0, void 0, function* () {
     const { skip, take, page, limit } = (0, pagination_util_1.getPagination)(query);
     const { search, categoryId, sortBy = "createdAt", order = "desc" } = query;
-    // 🧠 Build filter "where"
+    // Build filter "where"
     const where = Object.assign(Object.assign({ isDeleted: false }, (search
         ? {
             name: {
@@ -29,7 +29,7 @@ const getAllProductsService = (query) => __awaiter(void 0, void 0, void 0, funct
             },
         }
         : {})), (categoryId ? { categoryId } : {}));
-    // 🧾 Fetch products + count in parallel
+    // Fetch products + count in parallel
     const [data, total] = yield Promise.all([
         prisma_1.default.product.findMany({
             where,
@@ -40,7 +40,7 @@ const getAllProductsService = (query) => __awaiter(void 0, void 0, void 0, funct
         }),
         prisma_1.default.product.count({ where }),
     ]);
-    // 🎯 Return result with pagination metadata
+    // Return result with pagination metadata
     return {
         data,
         meta: {

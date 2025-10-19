@@ -17,13 +17,16 @@ const getTransactionHistoryController = (req, res, next) => __awaiter(void 0, vo
         logger_1.logger.info("Get transaction history controller called");
         const cashierId = req.user.userId;
         const role = req.user.role;
-        const { page, limit, search } = req.query;
+        const { page, limit, search, paymentMethod, sortBy, sortOrder, } = req.query;
         const history = yield (0, get_transaction_history_service_1.getTransactionHistoryService)({
             page: Number(page),
             limit: Number(limit),
             search: String(search || ""),
             cashierId,
             role,
+            paymentMethod: paymentMethod,
+            sortBy: sortBy,
+            sortOrder: sortOrder,
         });
         logger_1.logger.info(`Transaction history retrieved successfully: ${JSON.stringify(history)}`);
         return res.status(200).json({

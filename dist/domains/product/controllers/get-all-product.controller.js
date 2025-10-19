@@ -18,12 +18,14 @@ const getAllProductsController = (req, res, next) => __awaiter(void 0, void 0, v
         const limit = Number(req.query.limit) || 10;
         const search = (_a = req.query.search) === null || _a === void 0 ? void 0 : _a.toString();
         const categoryId = req.query.categoryId ? Number(req.query.categoryId) : undefined;
-        const sortBy = req.query.sortBy === "name" ||
-            req.query.sortBy === "price" ||
-            req.query.sortBy === "createdAt"
+        const sortBy = req.query.sortBy === "price" || req.query.sortBy === "createdAt"
             ? req.query.sortBy
             : "createdAt";
-        const order = req.query.order === "asc" || req.query.order === "desc" ? req.query.order : "desc";
+        const order = req.query.sortOrder === "asc" || req.query.sortOrder === "desc"
+            ? req.query.sortOrder
+            : req.query.order === "asc" || req.query.order === "desc"
+                ? req.query.order
+                : "asc";
         const products = yield (0, get_all_product_service_1.getAllProductsService)({ page, limit, search, categoryId, sortBy, order });
         return res.status(200).json(Object.assign({ success: true, message: "Products retrieved successfully" }, products));
     }
